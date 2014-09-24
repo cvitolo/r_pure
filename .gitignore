@@ -9,3 +9,12 @@
 
 # RStudio files
 .Rproj.user/
+.Rproj.user
+pure.Rproj
+.Rbuildignore
+
+# old files
+old
+
+# test files
+test

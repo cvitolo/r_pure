@@ -1,0 +1,13 @@
+import(chron)
+import(grid)
+import(gstat)
+import(hydroTSM)
+import(manipulate)
+import(outliers)
+import(rgdal)
+import(sp)
+import(udunits2)
+import(xts)
+import(zoo)
+
+exportPattern("^[[:alpha:]]+")
