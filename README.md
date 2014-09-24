@@ -13,7 +13,8 @@ install.packages("udunits2")
 install.packages("outliers")
 install.packages("hydroTSM")
 
-### Basics
+
+#### Basics
 Install and load packages
 ```R
 # Install dependent packages from CRAN:
@@ -44,7 +45,6 @@ install_github("r_pure", username = "cvitolo", subdir = "pure")
 library(pure)
 ```
 
-### Use PURE data
 Use data from Imperial College database:
 ```R
 CatchmentName <- "Pontbren" 
@@ -59,9 +59,10 @@ DataList <- LoadMyData(CatchmentName,SubcatchmentName,datafolder)
 # manipulatePlot(DataList)
 ```
 
-# Pre-processing: Utility functions for Time Series screening
+### Pre-processing
+Below are a series of utility functions for time series screening. 
 
-### Scan the time series and report problems
+##### Scan the time series and report problems
 ```R
 # Precipitation units = mm/d
 ScanTS(DataList$P, returnGapsInfo=TRUE, 
@@ -76,34 +77,34 @@ ScanTS(DataList$Q, returnGapsInfo=TRUE,
        returnTimeInfo=TRUE, returnNegInfo=TRUE)
 ```
 
-### Convert from irregular to regular time series
+##### Convert from irregular to regular time series
 This function shifts the records to align with a regular grid
 ```R
 regTS <- irreg2regTS(CatchmentName, DataList, deltim)
 ```
 
-### Check if there are gaps in the records and infill 
+##### Check if there are gaps in the records and infill 
 ```R
 gaps <- findGaps(regTS,deltim)
 NoGaps <- fullrangeTS(regTS, gaps$fullranges)
 infilled <- fillGaps(NoGaps)
 ``` 
 
-### Correct negative values (if applicable)
+##### Correct negative values (if applicable)
 ```R
 NoNeg <- correctNeg(infilled)
 ```
 
-### ToDo: Remove Outliers?
+##### ToDo: Remove Outliers?
 
-### Areal averaging
+##### Areal averaging
 Available algorithms: "AritmeticMean", "Thiessen", "IDW", "OK" 
 ```R
 InterpolationMethod <- "Thiessen"
 Paveraged <- RainfallArealAveraging(CatchmentName,overlappingTS(NoNeg)$P,DataList,InterpolationMethod) 
 ```
 
-### Convertion to use TS with FUSE
+##### Convertion to use TS with FUSE
 ```R
 Pconverted <- Paveraged # original values are already in mm/d
 Econverted <- ConvertTS(NoNeg$E,from="mm/h", to="mm/d")
@@ -111,14 +112,14 @@ Qconverted <- ConvertTS(NoNeg$Q,from="l/s", to="mm/day",
                         optionalInput=DataList$Area*10^12)
 ```
 
-### Extract overlapping periods
+##### Extract overlapping periods
 ```R
 DATA <- ExtractOverlappingPeriod(Pconverted,Econverted,Qconverted,ignoreQ=TRUE)
 ```
 
 # Rainfall-Runoff modelling with FUSE
 
-### Generate parameter set to use in FUSE
+##### Generate parameter set to use in FUSE
 ```R
 set.seed(123)
 NumberOfRuns <- 1000
