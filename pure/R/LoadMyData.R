@@ -5,14 +5,14 @@
 #'
 #' @param SubcatchmentName this is an integer number representing the name of
 #'        the subcatchment. Predefined values are:
-#'        For Eden:      1 (Eden@BlindBeck),   2 (Eden@Dacre),
-#'        For Pontbren:  1 (Pontbren@Site1),   2 (Pontbren@Site2),
-#'                       3 (Pontbren@Site3),   4 (Pontbren@Site4),
-#'                       5 (Pontbren@Site5),   6 (Pontbren@Site6),
-#'                       7 (Pontbren@Site7),   8 (Pontbren@Site8),
-#'                       9 (Pontbren@Site9),  10 (Pontbren@Site10),
-#'                      11 (Pontbren@Site11), 12 (Pontbren@Site12),
-#'                      13 (Pontbren@Site13)
+#'        For Eden:      1 (Eden at BlindBeck),   2 (Eden at Dacre),
+#'        For Pontbren:  1 (Pontbren at Site1),   2 (Pontbren at Site2),
+#'                       3 (Pontbren at Site3),   4 (Pontbren at Site4),
+#'                       5 (Pontbren at Site5),   6 (Pontbren at Site6),
+#'                       7 (Pontbren at Site7),   8 (Pontbren at Site8),
+#'                       9 (Pontbren at Site9),  10 (Pontbren at Site10),
+#'                      11 (Pontbren at Site11), 12 (Pontbren at Site12),
+#'                      13 (Pontbren at Site13)
 #'
 #' @param datafolder path to the folder containing the data
 #'
@@ -25,7 +25,7 @@
 #'         $deltimQ observed streamflow discharge time step
 #'
 #' @examples
-#' #LoadMyData(CatchmentName="Eden",SubcatchmentName=2)
+#' # LoadMyData(CatchmentName="Eden",SubcatchmentName=2, datafolder="/home/data/")
 #'
 
 LoadMyData <- function(CatchmentName,SubcatchmentName, datafolder){
@@ -34,6 +34,7 @@ LoadMyData <- function(CatchmentName,SubcatchmentName, datafolder){
   if (CatchmentName == "Pontbren") {
 
     load(paste(datafolder,"pontbren.rda",sep=""))
+    pontbren <- pontbren
 
     E <- pontbren$Epontbren # 1 hour time step # as.numeric(median(diff(index(E))))
     P0 <- pontbren$Ppontbren # 10 min time step # E.g. as.numeric(median(diff(index(P[[1]]))))
@@ -184,6 +185,7 @@ LoadMyData <- function(CatchmentName,SubcatchmentName, datafolder){
   if (CatchmentName == "Eden") {
 
     load(paste(datafolder,"eden.rda",sep=""))
+    eden <- eden
 
     if (SubcatchmentName == 1) {  #BlindBeck
       # It uses Blindbeck dataset from Sep 2005 to Oct 2005
@@ -222,12 +224,19 @@ LoadMyData <- function(CatchmentName,SubcatchmentName, datafolder){
     print("Invalid name of catchment! See documentation.")
   }else{
 
-    ## Projection for the GIS files
+    ID <- NULL
+
+    # Projection for the GIS files
     # British National Grid
-    #proj4string(DTM) <- CRS("+init=epsg:27700")
+    # proj4string(DTM) <- CRS("+init=epsg:27700")
     GISinfo <- read.csv( paste(datafolder,"pure_rain_stations.csv",sep="") )
-    subcatchments <- readOGR(dsn=datafolder,layer="subcatchments") # do not use ~ for home folder, rgdal does not like it!
-    catchment <- subset(subcatchments,ID==paste(ifelse(CatchmentName=="Pontbren","P","E"),SubcatchmentName,sep=""))
+
+    # do not use ~ for home folder, rgdal does not like it!
+    subcatchments <- readOGR(dsn=datafolder,layer="subcatchments")
+
+    catchment <- subset(subcatchments,
+                        ID==paste(ifelse(CatchmentName=="Pontbren","P","E"),
+                                  SubcatchmentName,sep=""))
 
     DATA <- list("P"=P,
                  "E"=E,
