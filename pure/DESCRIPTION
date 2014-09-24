@@ -12,6 +12,11 @@ Imports:
     raster,
     zoo,
     rgdal,
-    outliers
+    outliers,
+    xts,
+    udunits2,
+    sp
+Suggests:
+    hydroTSM
 License: GPL (>=3)
 URL: https://github.com/cvitolo/pure

@@ -1,6 +1,9 @@
 import(raster)
+import(sp)
 import(zoo)
 import(rgdal)
 import(outliers)
+import(xts)
+import(udunits2)
 
 exportPattern("^[[:alpha:]]+")
