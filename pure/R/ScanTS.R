@@ -1,272 +1,343 @@
-#' Scans time series given in input and checks for un-even recording times,
+#' Scan time series given in input and check for un-even recording times,
 #' negative values and missing values.
 #'
-#' @param OriginalDataset Time series, it can be zoo, xts, etc
-#' @param returnGapsInfo bolean, default value is TRUE
-#' @param returnTimeInfo bolean, default value is TRUE
+#' @param dataset Time series, it can be zoo, xts, etc
 #' @param returnNegInfo bolean, default value is TRUE
+#' @param returnTimeInfo bolean, default value is TRUE
+#' @param returnMissingsInfo bolean, default value is TRUE
+#'
 #' @param verbose bolean, default value is TRUE
 #'
-#' @return print useful information
+#' @return print useful information and suggestions
+#'
+#' @author Claudia Vitolo
 #'
 #' @examples
-#' # ScanTS( dataset=Q[[8]] , returnGapsInfo=TRUE, returnTimeInfo=TRUE,
-#' #         returnNegInfo=TRUE , verbose = TRUE)
+#' # ScanTS( dataset )
 #'
 
-ScanTS <- function(OriginalDataset,
-                   returnGapsInfo=TRUE,
-                   returnTimeInfo=TRUE,
+ScanTS <- function(dataset,
                    returnNegInfo=TRUE,
-                   verbose = TRUE){
+                   returnTimeInfo=TRUE,
+                   returnMissingsInfo=TRUE,
+                   verbose = FALSE){
 
-  ListOfDatasets <- as.list(OriginalDataset)
+  # GENERAL INFO
+  NEG  <- FALSE
+  GAP  <- FALSE
+  IRR  <- FALSE
+  MIS  <- FALSE
 
-  for (counter in 1:length(ListOfDatasets)){
+  lengthTotal <- length(dataset)
 
-    dataset <- ListOfDatasets[[counter]]
+  # detect the most probable time step
+  timestep <- median( as.numeric(diff( index(dataset) )) )
+  myUnits <- attributes(median( diff( index(dataset) )))$units
 
-    if (verbose == TRUE) {
-      cat("#################### GENERAL INFO ####################")
-      cat("\n")
-      cat("\n")
-      print( paste( "Time Series",counter,"of", length(ListOfDatasets),". It starts on", index(head(dataset)[1]), "and ends on", index(tail(dataset)[6]) ), quote=FALSE, row.names = FALSE )
-      cat("\n")
-      print(median( diff( index(dataset) )))
-      cat("\n")
+  if ( verbose == TRUE ){
 
-      cat("Summary statistics:")
-      print(summary(dataset))
-      cat("\n")
+    cat("#### GENERAL INFO #####################################################")
+    cat("\n")
+    cat("\n")
 
-      #Detect outliers
-      cat("#################### SCANNING FOR OUTLIERS ####################")
-      cat("\n")
-      print(chisq.out.test(as.numeric(dataset)))
-      cat("\n")
-    }
+    print( paste( "This time series starts on",
+                  index(head(dataset)[1]),
+                  "and ends on",
+                  index(tail(dataset)[6]) ),
+           quote=FALSE, row.names = FALSE )
+    cat("\n")
 
-    # detect the most probable time step
-    timestep <- median( as.numeric(diff( index(dataset) )) )
+    print( paste("The most probable time step is",
+                 timestep,
+                 myUnits),
+           quote=FALSE )
+    cat("\n")
 
-    if (returnGapsInfo==TRUE & verbose == TRUE){
-      cat("#################### SCANNING FOR GAPS IN THE RECORDS ####################")
-      cat("\n")
-      cat("\n")
-
-      lengthTotal <-length(dataset)
-      lengthMissing <- length(which(is.na(dataset)))
-      percentageMissing <- round( (1 - ((lengthTotal-lengthMissing) / lengthTotal))*100, 2)
-
-      cat("Percentage of missing values")
-      print( paste(percentageMissing,"%", sep="") )
-      if ( any(diff(index(dataset))>timestep) ) {
-        cat("Missing values have been detected at the following starting times:")
-        cat("\n")
-        cat("\n")
-        cat("2*timestep gap:")
-        cat("\n")
-        print( paste(index( dataset[which(diff(index(dataset))>timestep & diff(index(dataset))<=2*timestep)] ), ",", sep="" ), quote = FALSE)
-        cat("\n")
-        cat("3*timestep gap:")
-        cat("\n")
-        print( index( dataset[which(diff(index(dataset))>2*timestep & diff(index(dataset))<=3*timestep)] ), quote = FALSE)
-        cat("\n")
-        cat("Longer gaps:")
-        cat("\n")
-        print( index( dataset[which(diff(index(dataset))>3*timestep)] ), quote = FALSE)
-        cat("\n")
-      }else{
-        cat( "No gaps have been detected!")
-        cat("\n")
-        cat("\n")
-      }
-    }
-
-    if (returnTimeInfo==TRUE & verbose == TRUE){
-      cat("#################### SCANNING FOR DIFFERENT RECORDING TIMES ####################")
-      cat("\n")
-      cat("\n")
-      regularTS <- NA
-      timestep <- as.numeric(timestep)
-      # Check if this is a regular hourly time series
-      if (attributes(median( diff( index(dataset) )))$units =="hours" & median( as.numeric(diff( index(dataset) )))==1) {
-        timestep <- 60
-        print("This is a regular hourly time series")
-        regularTS <- "YES"
-      }
-
-      # check if there are missing values at the beginning of the dataset
-      if (length( sort( unique(as.POSIXlt(index(dataset)[1:60/timestep])$min) ) ) < 60/timestep ) {
-        cat("Missing values at the beginning of the dataset, please remove them and try again.")
-      }else{
-
-        tempdataset <- dataset
-        RecordingTimes <- sort( unique(as.POSIXlt(index(tempdataset)[1:60/timestep])$min) )
-
-        if (length(RecordingTimes)==4){
-
-          RecordingChange <- which(as.POSIXlt(index(tempdataset))$min != RecordingTimes[1] &
-                                     as.POSIXlt(index(tempdataset))$min != RecordingTimes[2] &
-                                     as.POSIXlt(index(tempdataset))$min != RecordingTimes[3] &
-                                     as.POSIXlt(index(tempdataset))$min != RecordingTimes[4])[1]
-          if (!is.na(RecordingChange)) {
-            cat( "This is an irregular time series, as recording times change throughout the dataset:" )
-            cat("\n")
-            cat("\n")
-            cat( paste("From ",index(tempdataset)[1]," to ",index(tempdataset)[RecordingChange-1]," values are recorded every hour at the following minutes: ",
-                       RecordingTimes[1], " ", RecordingTimes[2], " ",
-                       RecordingTimes[3], " ", RecordingTimes[4], ".",sep="" ) )
-            cat("\n")
-            while ( any( as.POSIXlt(index(tempdataset))$min != RecordingTimes[1] &
-                           as.POSIXlt(index(tempdataset))$min != RecordingTimes[2] &
-                           as.POSIXlt(index(tempdataset))$min != RecordingTimes[3] &
-                           as.POSIXlt(index(tempdataset))$min != RecordingTimes[4] ) ){
-
-              tempdataset <- tempdataset[RecordingChange:length(tempdataset)]
-              RecordingTimes <- sort( unique(as.POSIXlt(index(tempdataset)[1:60/timestep])$min) )
-              RecordingChange <- ifelse(is.na(which(as.POSIXlt(index(tempdataset))$min != RecordingTimes[1] &
-                                                      as.POSIXlt(index(tempdataset))$min != RecordingTimes[2] &
-                                                      as.POSIXlt(index(tempdataset))$min != RecordingTimes[3] &
-                                                      as.POSIXlt(index(tempdataset))$min != RecordingTimes[4])[1]),
-                                        length(tempdataset),
-                                        which(as.POSIXlt(index(tempdataset))$min != RecordingTimes[1] &
-                                                as.POSIXlt(index(tempdataset))$min != RecordingTimes[2] &
-                                                as.POSIXlt(index(tempdataset))$min != RecordingTimes[3] &
-                                                as.POSIXlt(index(tempdataset))$min != RecordingTimes[4])[1])
-              cat( paste("From ",index(tempdataset)[1]," to ",index(tempdataset)[RecordingChange-1]," values are recorded every hour at the following minutes: ",
-                         RecordingTimes[1], " ", RecordingTimes[2], " ",
-                         RecordingTimes[3], " ", RecordingTimes[4], ".",sep="" ) )
-              cat("\n")
-            }
-          }else{
-            cat( "This is a regular time series" )
-            regularTS <- "YES"
-            cat("\n")
-          }
-        }
-
-        if (length(RecordingTimes)==6){
-          RecordingChange <- which(as.POSIXlt(index(tempdataset))$min != RecordingTimes[1] &
-                                     as.POSIXlt(index(tempdataset))$min != RecordingTimes[2] &
-                                     as.POSIXlt(index(tempdataset))$min != RecordingTimes[3] &
-                                     as.POSIXlt(index(tempdataset))$min != RecordingTimes[4] &
-                                     as.POSIXlt(index(tempdataset))$min != RecordingTimes[5] &
-                                     as.POSIXlt(index(tempdataset))$min != RecordingTimes[6])[1]
-          if (!is.na(RecordingChange)) {
-            cat( "This is an irregular time series, as recording times change throughout the dataset:" )
-            cat("\n")
-            cat("\n")
-
-            cat( paste("From ",index(tempdataset)[1]," to ",index(tempdataset)[RecordingChange-1]," values are recorded every hour at the following minutes: ",
-                       RecordingTimes[1], " ", RecordingTimes[2], " ",
-                       RecordingTimes[3], " ", RecordingTimes[4], " ",
-                       RecordingTimes[5], " ", RecordingTimes[6], ".",sep="" ) )
-            cat("\n")
-            while ( any( as.POSIXlt(index(tempdataset))$min != RecordingTimes[1] &
-                           as.POSIXlt(index(tempdataset))$min != RecordingTimes[2] &
-                           as.POSIXlt(index(tempdataset))$min != RecordingTimes[3] &
-                           as.POSIXlt(index(tempdataset))$min != RecordingTimes[4] &
-                           as.POSIXlt(index(tempdataset))$min != RecordingTimes[5] &
-                           as.POSIXlt(index(tempdataset))$min != RecordingTimes[6] ) ){
-
-              tempdataset <- tempdataset[RecordingChange:length(tempdataset)]
-              RecordingTimes <- sort( unique(as.POSIXlt(index(tempdataset)[1:60/timestep])$min) )
-              RecordingChange <- ifelse(is.na(which(as.POSIXlt(index(tempdataset))$min != RecordingTimes[1] &
-                                                      as.POSIXlt(index(tempdataset))$min != RecordingTimes[2] &
-                                                      as.POSIXlt(index(tempdataset))$min != RecordingTimes[3] &
-                                                      as.POSIXlt(index(tempdataset))$min != RecordingTimes[4] &
-                                                      as.POSIXlt(index(tempdataset))$min != RecordingTimes[5] &
-                                                      as.POSIXlt(index(tempdataset))$min != RecordingTimes[6])[1]),
-                                        length(tempdataset),
-                                        which(as.POSIXlt(index(tempdataset))$min != RecordingTimes[1] &
-                                                as.POSIXlt(index(tempdataset))$min != RecordingTimes[2] &
-                                                as.POSIXlt(index(tempdataset))$min != RecordingTimes[3] &
-                                                as.POSIXlt(index(tempdataset))$min != RecordingTimes[4] &
-                                                as.POSIXlt(index(tempdataset))$min != RecordingTimes[5] &
-                                                as.POSIXlt(index(tempdataset))$min != RecordingTimes[6])[1])
-              cat( paste("From ",index(tempdataset)[1]," to ",index(tempdataset)[RecordingChange-1]," values are recorded every hour at the following minutes: ",
-                         RecordingTimes[1], " ", RecordingTimes[2], " ",
-                         RecordingTimes[3], " ", RecordingTimes[4], " ",
-                         RecordingTimes[5], " ", RecordingTimes[6], ".",sep="" ) )
-              cat("\n")
-            }
-          }else{
-            cat( "This is a regular time series" )
-            cat("\n")
-          }
-        }
-
-      }
-      cat("\n")
-    }
-
-    if (returnNegInfo==TRUE & verbose == TRUE){
-
-      cat("#################### SCANNING FOR NEGATIVE VALUES ####################")
-      cat("\n")
-      cat("\n")
-      percentageNegative <- 0
-      if (any(dataset<0,rm.na=TRUE)) {
-        percentageNegative <- round( 100 * (1 - (lengthTotal-length(which(dataset<0)))/lengthTotal ), 2)
-        if (percentageNegative > 0){
-          startignore <- head(dataset[which(dataset<0)])[1]
-          endignore <- tail(dataset[which(dataset<0)])[6]
-          print(paste(percentageNegative,"% negative values detected between",index(startignore),"and", index(endignore)))
-        }
-      }else{
-        cat( "No negative values have been detected!" )
-        cat("\n")
-        cat("\n")
-      }
-    }
+    cat("Summary statistics:")
+    cat("\n")
+    cat("\n")
+    print(summary(dataset))
+    cat("\n")
 
   }
 
-  summaryRecord <- list("Start"=index(head(dataset)[1]),
-                     "End"=index(tail(dataset)[6]),
-                     "Regular"=regularTS,
-                     "percentageMissing"=percentageMissing,
-                     "percentageNegative"=percentageNegative)
+  # NEGATIVE VALUES
 
-  return(summaryRecord)
+  percentageNegative <- 0
 
-}
+  if ( any(dataset < 0) ) {
 
-#' Scans time series in a named list
-#'
-#' @param myTS list of time series, it can be zoo, xts, etc
-#'
-#' @return print useful information
-#'
-#' @examples
-#' # myTS( dataset=Q[[8]])
-#'
+    lNeg <- length( which( dataset < 0 ) )
+    percentageNegative <- 1 - ((lengthTotal - lNeg)/lengthTotal)
 
-scanTimeSeries <- function(myTS){
+    if (percentageNegative > 0){
 
-  dimnamesTS <- attributes(myTS)[2]$dimnames[[2]]
+      startignore <- head(dataset[which(dataset<0)])[1]
+      endignore <- tail(dataset[which(dataset<0)])[lNeg]
 
-  if ( is.null(dimnamesTS) ){
+    }
 
-    results <- ScanTS(myTS)
+    if ( returnNegInfo == TRUE ) NEG <- TRUE
 
-  }else{
+  }
 
-    lTS <- length(dimnamesTS)
-    results <- list()
+  if ( returnNegInfo==TRUE & verbose == TRUE ){
 
-    for (i in 1:lTS){
+    cat("#### NEGATIVE VALUES ############################################")
+    cat("\n")
+    cat("\n")
 
-      eval(parse(text=paste("myTS$",dimnamesTS[i],sep="")))
+    if (percentageNegative > 0){
 
-      results[1]
+      print(paste(percentageNegative,
+                  "% negative values detected between ",
+                  index(startignore),
+                  " and ",
+                  index(endignore),
+                  sep=""))
+
+    }else{
+
+      cat( "No negative values have been detected!" )
+      cat("\n")
+      cat("\n")
 
     }
 
   }
 
-  return(results)
+  # GAPS IN RECORDS AND TIMESTEP IRREGULARITIES
+
+  if ( any( diff(index(dataset)) > timestep ) ) {
+    IRR <- TRUE
+
+    tempdataset <- dataset
+    tempIndex0 <- as.POSIXlt(index(tempdataset)[1:60/timestep])$min
+    RecordingTimes <- sort( unique(tempIndex0) )
+    tempIndex <- as.POSIXlt(index(tempdataset))$min
+
+  }
+
+  if ( returnTimeInfo==TRUE & verbose == TRUE ){
+    cat("#### GAPS IN THE RECORDS ############################################")
+    cat("\n")
+    cat("\n")
+
+    if ( any( diff(index(dataset)) > timestep ) ) {
+
+      GAP <- TRUE
+
+      cat("Gaps have been detected at the following starting times:")
+      cat("\n")
+      cat("\n")
+      tstep <- diff(index(dataset))
+
+      cat("2*timestep gap:")
+      cat("\n")
+      checkCondition <- which( tstep > timestep & tstep <= 2*timestep )
+      print( paste(index( dataset[checkCondition] ), ",",sep=""),
+             quote = FALSE )
+      cat("\n")
+
+      cat("3*timestep gap:")
+      cat("\n")
+      checkCondition <- which( tstep > 2*timestep & tstep <= 3*timestep )
+      print( paste(index( dataset[checkCondition] ), ",",sep=""),
+             quote = FALSE )
+      cat("\n")
+
+      cat("Longer gaps:")
+      cat("\n")
+      checkCondition <- which( tstep > 3*timestep )
+      print( paste(index( dataset[checkCondition] ), ",",sep=""),
+             quote = FALSE )
+      cat("\n")
+
+    }else{
+
+      cat( "No gaps have been detected!")
+      cat("\n")
+      cat("\n")
+
+    }
+
+    if ( length(RecordingTimes) == 4 ){
+
+      RecordingChange <- which(tempIndex != RecordingTimes[1] &
+                                 tempIndex != RecordingTimes[2] &
+                                 tempIndex != RecordingTimes[3] &
+                                 tempIndex != RecordingTimes[4])[1]
+
+      if (!is.na(RecordingChange)) {
+        cat( "Recording times change throughout the dataset:" )
+        cat("\n")
+        cat("\n")
+        cat( paste("From",index(tempdataset)[1],
+                   "to",index(tempdataset)[RecordingChange-1]))
+        cat("\n")
+        cat( paste("values are recorded every hour at the following minutes:",
+                   " ", RecordingTimes[1], " ", RecordingTimes[2], " ",
+                   RecordingTimes[3], " ", RecordingTimes[4]) )
+        cat("\n")
+        cat("\n")
+        while ( any( tempIndex != RecordingTimes[1] &
+                       tempIndex != RecordingTimes[2] &
+                       tempIndex != RecordingTimes[3] &
+                       tempIndex != RecordingTimes[4] ) ){
+
+          tempdataset <- tempdataset[RecordingChange:length(tempdataset)]
+
+          tempIndex0 <- as.POSIXlt(index(tempdataset)[1:60/timestep])$min
+          RecordingTimes <- sort( unique(tempIndex0) )
+          tempIndex <- as.POSIXlt(index(tempdataset))$min
+
+          x1 <- which(tempIndex != RecordingTimes[1] &
+                        tempIndex != RecordingTimes[2] &
+                        tempIndex != RecordingTimes[3] &
+                        tempIndex != RecordingTimes[4])[1]
+
+          RecordingChange <- ifelse(is.na(x1), length(tempdataset), x1)
+
+          cat( paste("From",index(tempdataset)[1],
+                     "to",index(tempdataset)[RecordingChange-1]))
+          cat("\n")
+          cat( paste("values are recorded every hour at the following minutes:",
+                     " ", RecordingTimes[1], " ", RecordingTimes[2], " ",
+                     RecordingTimes[3], " ", RecordingTimes[4], ".",sep="" ) )
+          cat("\n")
+          cat("\n")
+        }
+
+      }
+
+    }
+
+    if ( length(RecordingTimes) == 6 ){
+
+      RecordingChange <- which(tempIndex != RecordingTimes[1] &
+                                 tempIndex != RecordingTimes[2] &
+                                 tempIndex != RecordingTimes[3] &
+                                 tempIndex != RecordingTimes[4] &
+                                 tempIndex != RecordingTimes[5] &
+                                 tempIndex != RecordingTimes[6])[1]
+
+      if (!is.na(RecordingChange)) {
+
+        cat( "Recording times change throughout the dataset:" )
+        cat("\n")
+        cat("\n")
+
+        cat( paste("From", index(tempdataset)[1],
+                   "to", index(tempdataset)[RecordingChange-1]))
+        cat("\n")
+        cat( paste("values are recorded every hour at the following minutes:",
+                   " ", RecordingTimes[1], " ", RecordingTimes[2], " ",
+                   RecordingTimes[3], " ", RecordingTimes[4], " ",
+                   RecordingTimes[5], " ", RecordingTimes[6], ".",sep="" ) )
+        cat("\n")
+        cat("\n")
+        while ( any( tempIndex != RecordingTimes[1] &
+                       tempIndex != RecordingTimes[2] &
+                       tempIndex != RecordingTimes[3] &
+                       tempIndex != RecordingTimes[4] &
+                       tempIndex != RecordingTimes[5] &
+                       tempIndex != RecordingTimes[6] ) ){
+
+          tempdataset <- tempdataset[RecordingChange:length(tempdataset)]
+
+          tempIndex0 <- as.POSIXlt(index(tempdataset)[1:60/timestep])$min
+          RecordingTimes <- sort( unique(tempIndex0) )
+          tempIndex <- as.POSIXlt(index(tempdataset))$min
+
+          x1 <- which(tempIndex != RecordingTimes[1] &
+                        tempIndex != RecordingTimes[2] &
+                        tempIndex != RecordingTimes[3] &
+                        tempIndex != RecordingTimes[4] &
+                        tempIndex != RecordingTimes[5] &
+                        tempIndex != RecordingTimes[6])[1]
+
+          RecordingChange <- ifelse(is.na(x1), length(tempdataset), x1)
+
+          cat( paste("From",index(tempdataset)[1],
+                     "to",index(tempdataset)[RecordingChange-1]))
+          cat("\n")
+          cat( paste("values are recorded every hour at the following minutes:",
+                     " ", RecordingTimes[1], " ", RecordingTimes[2], " ",
+                     RecordingTimes[3], " ", RecordingTimes[4], " ",
+                     RecordingTimes[5], " ", RecordingTimes[6], ".",sep="" ) )
+          cat("\n")
+          cat("\n")
+        }
+
+      }
+
+    }
+
+  }
+
+  # MISSING VALUES
+
+  lengthMissing <- length(which(is.na(dataset)))
+  percentageMissing <- (1 - ((lengthTotal-lengthMissing) / lengthTotal))
+
+  if ( percentageMissing > 0) {
+
+    MIS <- TRUE
+
+  }
+
+  if ( returnMissingsInfo == TRUE & verbose == TRUE ){
+
+    cat("#### MISSING VALUES #################################################")
+    cat("\n")
+    cat("\n")
+
+    if (percentageNegative > 0){
+
+      print( paste("Missing values", percentageMissing, "%"), quote=FALSE)
+
+    }else{
+
+      cat( "No missing values have been detected!" )
+      cat("\n")
+      cat("\n")
+
+    }
+
+  }
+
+  message( "#### Recommendations: ###########################################" )
+
+
+  message( paste("Do I need to correct negative values?",
+                 ifelse(NEG,"YES","NO") ) )
+  if ( NEG == TRUE ) {
+    message("Use CorrectNeg() to remove negative values,")
+    message("this will generate missing values!")
+  }
+  cat("\n")
+
+  message( paste("Do I need to correct recording times to make them regular?",
+                 ifelse(IRR,"YES","NO") ) )
+  if ( GAP == TRUE & IRR == TRUE ) {
+    message("Use FillGaps() then Irr2Reg() to get a regular time series")
+  }
+  if ( GAP == TRUE & IRR == FALSE ) {
+    message("Use FillGaps() to add time steps for the detected gaps, ")
+    message("this will generate missing values!")
+  }
+  if ( GAP == FALSE & IRR == TRUE ) {
+    message("Use Irr2Reg() to get a regular time series")
+  }
+  cat("\n")
+
+  message( paste("Do I need to infill missing values?",
+                 ifelse(any(GAP,MIS),"YES","NO") ) )
+  if ( any(GAP,MIS) == TRUE | all(GAP,MIS) == TRUE ) {
+    message("Use FillGaps() to infill missing values")
+  }
+  cat("\n")
+
+  message("Run the function ScanTS() with option verbose = TRUE for more info.")
 
 }
-

@@ -1,7 +1,7 @@
 PURE (R package)
 ================
 
-Workflow for land management scenario analysis
+Workflow for flood frequency analysis under uncertainty.
 
 Project: PURE (Probability, Uncertainty and Risk in the Environment) - RACER consortium (Flood strand)
 
@@ -20,109 +20,89 @@ Install and load packages
 # Install dependent packages from CRAN:
 x <- c("zoo", "chron", "xts", "manipulate", "udunits2", "outliers", "rgdal", 
        "sp", "gstat", "grid", "hydroTSM", "Hmisc", "raster", "reshape2", 
-       "ggplot2", "lhs", "MASS")
-install.packages(x)
+       "ggplot2", "qualV", "lhs", "MASS")
+# install.packages(x)
 lapply(x, require, character.only=T)
-#library(plotly)
-#source("~/Dropbox/Repos/github/r_uncertflood/makePlotly.R")
 
 # Install dpendent package from R-Forge:
-install.packages("fuse", repos="http://R-Forge.R-project.org")
+# install.packages("fuse", repos="http://R-Forge.R-project.org")
 library(fuse)
 
 # Install dependent gists and packages from github:
 library(devtools)
 
-install_github("r_amca", username = "cvitolo", subdir = "amca")
+# install_github("r_amca", username = "cvitolo", subdir = "amca")
 library(amca)
 
-install_github("r_rnrfa", username = "cvitolo", subdir = "rnrfa")
+# install_github("r_rnrfa", username = "cvitolo", subdir = "rnrfa")
 library(rnrfa)
 source_gist("https://gist.github.com/cvitolo/f9d12402956b88935c38")
 
 # Install pure package
-install_github("r_pure", username = "cvitolo", subdir = "pure")
+# install_github("r_pure", username = "cvitolo", subdir = "pure")
 library(pure)
+
+# library(plotly)
+# source("~/Dropbox/Repos/github/r_uncertflood/makePlotly.R")
 ```
 
-Use data from Imperial College database:
+Make zoo objects for your time series: 
+
+* Q is the streamflow time series. 
+* E is the list of potential evapotranspiration time series. If E is unknown, wheather variables can be used to calculate the potential evapotranspiration (see section PET).
+* P is the list of rainfall time series. If there are 3 raingauges in the catchment (e.g. P1, P2 and P3), the object P is: 
+    + P <- list(P1,P2,P3)
+
+An example is given below:
 ```R
-CatchmentName <- "Pontbren" 
-SubcatchmentName <- 9      
-deltim <- 1/24
-# do not use ~ for home folder, rgdal does not like it!
-datafolder <- "/home/claudia/Dropbox/Projects/PURE/PURE_shared/Data/"
-```
-Load Time series data and GIS layers
-```R
-DataList <- LoadMyData(CatchmentName,SubcatchmentName,datafolder)
-# manipulatePlot(DataList)
+# Load sample time series (this contains 3 objects: P, E and Q)
+data(P1)
+data(P2)
+data(P3)
+data(E)
+data(Q)
 ```
 
 ### Pre-processing
-Below are a series of utility functions for time series screening. 
+Below are a series of utility functions for time series pre-processing. Those are divided into 4 sections: 
 
-##### Scan the time series and report problems
+* Report
+* Correct
+* Aggregate
+* Model specific preparation
+
+##### Report
+Report problems with time series using the function `ScanTS()`.
+As an example you can use the example dataset provided with this package.
+
 ```R
-# Precipitation units = mm/d
-ScanTS(DataList$P, returnGapsInfo=TRUE, 
-       returnTimeInfo=TRUE, returnNegInfo=TRUE) 
-
-# Potential evapotranspiration units = mm/h
-ScanTS(DataList$E, returnGapsInfo=TRUE, 
-       returnTimeInfo=TRUE, returnNegInfo=FALSE)
-
-# Streamflow discharge units = l/s
-ScanTS(DataList$Q, returnGapsInfo=TRUE, 
-       returnTimeInfo=TRUE, returnNegInfo=TRUE)
+# Report
+ScanTS( P1, verbose = TRUE  )
+ScanTS( P2, verbose = FALSE )
+ScanTS( P3, verbose = FALSE )
+ScanTS( E,  verbose = FALSE, returnNegInfo = FALSE )
+ScanTS( Q,  verbose = FALSE )
 ```
 
-##### Convert from irregular to regular time series
-This function shifts the records to align with a regular grid
+##### Correct
+Correct unrealistis values (e.g. negative P and Q) using the function `CorrectNeg()`. 
+Note E can be negative!
 ```R
-regTS <- irreg2regTS(CatchmentName, DataList, deltim)
+P1NoNeg <- CorrectNeg( P1 )
 ```
 
-##### Check if there are gaps in the records and infill 
+Often time series are recorded at non-regular time steps. You can shift your records to align them with a regular grid using the function `Irr2Reg()`.
 ```R
-gaps <- findGaps(regTS,deltim)
-NoGaps <- fullrangeTS(regTS, gaps$fullranges)
-infilled <- fillGaps(NoGaps)
-``` 
+# set a regular time step in days:
+P1Reg <- Irr2Reg( P1NoNeg )
+P2Reg <- Irr2Reg( P2 )
+P3Reg <- Irr2Reg( P3 )
+EReg  <- Irr2Reg( E )
+QReg  <- Irr2Reg( Q )
 
-##### Correct negative values (if applicable)
-```R
-NoNeg <- correctNeg(infilled)
+plot(P1NoNeg[40:45])
+lines(P1Reg[40:45],col="red")
 ```
 
-##### ToDo: Remove Outliers?
-
-##### Areal averaging
-Available algorithms: "AritmeticMean", "Thiessen", "IDW", "OK" 
-```R
-InterpolationMethod <- "Thiessen"
-Paveraged <- RainfallArealAveraging(CatchmentName,overlappingTS(NoNeg)$P,DataList,InterpolationMethod) 
-```
-
-##### Convertion to use TS with FUSE
-```R
-Pconverted <- Paveraged # original values are already in mm/d
-Econverted <- ConvertTS(NoNeg$E,from="mm/h", to="mm/d")
-Qconverted <- ConvertTS(NoNeg$Q,from="l/s", to="mm/day",
-                        optionalInput=DataList$Area*10^12)
-```
-
-##### Extract overlapping periods
-```R
-DATA <- ExtractOverlappingPeriod(Pconverted,Econverted,Qconverted,ignoreQ=TRUE)
-```
-
-# Rainfall-Runoff modelling with FUSE
-
-##### Generate parameter set to use in FUSE
-```R
-set.seed(123)
-NumberOfRuns <- 1000
-parameters <- GeneratePsetsFUSE(NumberOfRuns)
-```
-
+# Leave your feedback
+I would greatly appreciate if you could leave your feedbacks via email (cvitolodev@gmail.com).
