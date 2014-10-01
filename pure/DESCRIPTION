@@ -7,13 +7,13 @@ Author: Claudia Vitolo, Nathan Huntley
 Maintainer: Claudia Vitolo <cvitolodev@gmail.com>
 Description: Workflow for land management scenario analysis
 Depends:
-    R (>= 2.10)
+    R (>= 2.10),
+    xts
 Imports:
     raster,
     zoo,
     rgdal,
     outliers,
-    xts,
     udunits2,
     sp,
     fuse,

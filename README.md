@@ -22,7 +22,7 @@ x <- c("zoo", "chron", "xts", "manipulate", "udunits2", "outliers", "rgdal",
        "sp", "gstat", "grid", "hydroTSM", "Hmisc", "raster", "reshape2", 
        "ggplot2", "qualV", "lhs", "MASS")
 # install.packages(x)
-lapply(x, require, character.only=T)
+lapply(x, require, character.only=T); rm(x)
 
 # Install dpendent package from R-Forge:
 # install.packages("fuse", repos="http://R-Forge.R-project.org")
@@ -52,7 +52,6 @@ An example is given below:
 data(P1)
 data(P2)
 data(P3)
-data(E)
 data(Q)
 data(weather)
 ```
@@ -94,6 +93,7 @@ TD    <- Irr2Reg( weather$TD )
 NR    <- Irr2Reg( weather$NR )
 WS    <- Irr2Reg( weather$WS )
 
+# test the effect of Irr2Reg()
 plot(P1[40:45])
 lines(P1Reg[40:45],col="red")
 ```
@@ -103,41 +103,75 @@ Change any unrealistic values to NA (e.g. negative P and Q) using the function `
 ```R
 P1NoNeg <- CorrectNeg( P1Reg )
 
+# test the effect of CorrectNeg()
 plot(P1Reg)
 lines(P1NoNeg,col="red")
 ```
 
-Set a common temporal resolution and aggregate all the time series
+Find coarser temporal resolution amongst a list of time series:
 ```R
 myList <- list("P1" = P1NoNeg, "P2" = P2Reg, "P3" = P3Reg, 
-               "E" = EReg, "Q" = QReg, 
-               "TW" = TW, "TD" = TD, "NR" = NR, "WS" = WS)
-multiplier <- CommonTemporalResolution(myList)
-
-temp <- index(as.xts(aggregate(P1, align.time(index(P1), multiplier))))
-P <- zoo(aggregate(P1NoNeg, mean))
-
-P <- aggregate(P1NoNeg,by=rep(temp,), FUN=sum)
+               "Q" = QReg, "TW" = TW, "TD" = TD, "NR" = NR, "WS" = WS)
+multiplier <- CommonTemporalResolution(myList); multiplier
 ```
 
-Derive new variables, e.g. E from weather variables
+Aggregate all the time series to the temporal resolution above:
+```R
+P1 <- aggregate(myList$P1, align.time(index(myList$P1), multiplier), FUN = sum)
+P2 <- aggregate(myList$P2, align.time(index(myList$P2), multiplier), FUN = sum)
+P3 <- aggregate(myList$P3, align.time(index(myList$P3), multiplier), FUN = sum)
+TW <- aggregate(myList$TW, align.time(index(myList$TW), multiplier), FUN = mean)
+TD <- aggregate(myList$TD, align.time(index(myList$TD), multiplier), FUN = mean)
+NR <- aggregate(myList$NR, align.time(index(myList$NR), multiplier), FUN = mean)
+WS <- aggregate(myList$WS, align.time(index(myList$WS), multiplier), FUN = mean)
+Q  <- aggregate(myList$Q,  align.time(index(myList$Q ), multiplier), FUN = mean)
+
+plot(myList$Q[1:100])
+lines(Q[1:100],col="red")
+```
+
+Derive new variables, e.g. potential evapotranspiration from weather variables
 ```R
 E <- pet(stationElevation=0,TD,TW,NR,WS)
 ```
 
-Aggregate in space, e.g. averal averaging using spatial interpolation methods
+Select periods with simultaneous recordings
+```R
+tsList <- list("P1" = P1, "P2" = P2, "P3" = P3, "E" = E, "Q" = Q)
+newList <- ExtractOverlappingPeriod(tsList)
+```
+
+Aggregate in space, e.g. areal averaging using spatial interpolation methods
+```R
+tsList <- data.frame(index(newList),"P1"=newList$P1,
+                     "P2"=newList$P2,"P2"=newList$P3)
+P <- ArealAveraging(tsList,areas=c(0.3,0.6,0.1),interpolationMethod ="Thiessen")
+```
 
 Check if there are gaps in the records and infill
 ```R
-gaps <- findGaps(regTS,deltim)
-NoGaps <- fullrangeTS(regTS, gaps$fullranges)
-infilled <- fillGaps(NoGaps)
+any(is.na(P)) # FALSE
+
+any(is.na(newList$E)) # This returns TRUE, therefore we will infill the missing values
+Enomissing <- na.approx(newList$E)
+
+any(is.na(newList$Q)) # This returns TRUE, therefore we will infill the missing values
+Qnomissing <- na.approx(newList$Q)
 ```
 
-Convert units
+If necessary, convert units to mm/day:
+```R
+P <- P*24 # from mm/h to mm/day
+E <- Enomissing*24 # from mm/h to mm/day
 
-##### Aggregate and convert based on FUSE model requirements
+Area <- 10.55 # Km2
+Q <- Qnomissing*86.4/Area
+```
 
+Merge P, E and Q in 1 time series object
+```R
+DATA <- merge(P,E,Q)
+```   
 
 # Leave your feedback
 I would greatly appreciate if you could leave your feedbacks via email (cvitolodev@gmail.com).

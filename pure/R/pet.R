@@ -32,7 +32,9 @@ pet <- function(stationElevation=0,TD,TW,NR,WS){
   G <- rep(0,length(NRtemp))
 
   for (r in 1:length(NRtemp)){
-    print(paste(r,"out of",length(NRtemp)))
+
+    # print(paste(r,"out of",length(NRtemp)))
+
     if (myHOUR[r] >= 9 & myHOUR[r] <= 17) {
       G[r] <- 0.1 * NRtemp[r]
     }

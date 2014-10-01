@@ -1,40 +1,48 @@
 #' This function trims P, E and Q time series to the overlapping period.
 #' It is possible to ignore Q by setting ignoreQ=TRUE
 #'
-#' @param P0 precipitation time series (e.g. zoo object)
-#' @param E0 potential evapotranspiration time series (e.g. zoo object)
-#' @param Q0 streamflow discharge time series (e.g. zoo object)
-#' @param ignoreQ boolean by default set to FALSE. Used to the algorithm to ignore Q.
+#' @param tsList ist of time series (e.g. zoo objects)
 #'
-#' @return zoo object in which P, E and Q are merged.
+#' @return list of time series with the same temporal window
 #'
 #' @author Claudia Vitolo
 #'
 #' @examples
-#' #ExtractOverlappingPeriod(P0,E0,Q0,ignoreQ=FALSE)
+#' # ExtractOverlappingPeriod(tsList)
 #'
 
 
-ExtractOverlappingPeriod <- function(P0,E0,Q0,ignoreQ=FALSE){
+ExtractOverlappingPeriod <- function(tsList){
 
-  if (ignoreQ==TRUE) {
-    # find starting time
-    start0 <- max(index(P0)[1],index(E0)[1])
-    # find end time
-    end0 <- min(index(P0)[length(P0)],index(E0)[length(E0)])
-  }else{
-    # find starting time
-    start0 <- max(index(P0)[1],index(E0)[1],index(Q0)[1])
-    # find end time
-    end0 <- min(index(P0)[length(P0)],index(E0)[length(E0)],index(Q0)[length(Q0)])
+  maxIndex <- c()
+  minIndex <- c()
+
+  for(myTS in tsList) {
+
+    maxIndex <- append(maxIndex, max(index(myTS)))
+    minIndex <- append(minIndex, min(index(myTS)))
+
   }
 
-  P <- window(P0, start=start0,end=end0)
-  E <- window(E0, start=start0,end=end0)
-  Q <- window(Q0, start=start0,end=end0)
+  start0 <- max(minIndex)
+  end0   <- min(maxIndex)
 
-  finalDATA <- zoo( merge(P,E,Q) )
-  names(finalDATA) <- c("P","E","Q")
+  newList <- list()
 
-  return(finalDATA)
+  counter <- 0
+
+  for(myTS in tsList) {
+
+    counter <- counter + 1
+
+    newList[[counter]] <- window(myTS, start=start0,end=end0)
+
+  }
+
+  x <- do.call(merge,newList)
+
+  names(x) <- names(tsList)
+
+  return(x)
+
 }
