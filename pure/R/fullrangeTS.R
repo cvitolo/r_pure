@@ -5,6 +5,8 @@
 #'
 #' @return time series with no gaps in recording
 #'
+#' @author Claudia Vitolo
+#'
 #' @examples
 #' # fullrangeTS( myTS, myRanges )
 #'

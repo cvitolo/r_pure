@@ -19,7 +19,7 @@ Sometimes recording time in datasets can be shifted by few minutes.
 This function forces the minutes to be multiple of a certain "multiplier".
 }
 \examples{
-# Irr2Reg( dataset, deltim )
+# Irr2Reg( dataset )
 }
 \author{
 Claudia Vitolo

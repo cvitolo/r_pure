@@ -5,6 +5,8 @@
 #'
 #' @return a list of fullranges, times and intervals of occurring gaps
 #'
+#' @author Claudia Vitolo
+#'
 #' @examples
 #' # findGaps( myTS, deltim )
 #'
@@ -13,13 +15,13 @@ findGaps <- function(myTS,deltim) {
 
   multiplier <- 24*60*deltim
 
-  values <- myTS$E
-  datetime <- index(values)
+  dataset <- myTS$E
+  datetime <- index(dataset)
   # Get the range of dates covered
   fullrangeE <- seq(min(datetime), max(datetime), by = 60*multiplier) # by seconds
   # Get the dates in fullrangeE that are not in DF$V2
   gapsE <- fullrangeE[!fullrangeE %in% datetime]
-  x <- data.frame(datetime, values)
+  x <- data.frame(datetime, dataset)
   dtE <- data.frame( start= x[c(1, diff(x$datetime))>1, ]$datetime, end=x[diff(x$datetime)>1, ]$datetime)
   if ( length(gapsE)==0 ) {
     print("No gaps in the time series E")
@@ -32,13 +34,13 @@ findGaps <- function(myTS,deltim) {
     fullrangeP <- list()
     dtP <- list()
     for ( raingauges in 1:length(as.list(myTS$P)) ) {
-      values <- myTS$P[[raingauges]]
-      datetime <- index(values)
+      dataset <- myTS$P[[raingauges]]
+      datetime <- index(dataset)
       # Get the range of dates covered
       fullrangeP[[raingauges]] <- seq(min(datetime), max(datetime), by = 60*multiplier) # by seconds
       # Get the dates in fullrangeP that are not in DF$V2
       gapsP[[raingauges]] <- fullrangeP[[raingauges]][!fullrangeP[[raingauges]] %in% datetime]
-      x <- data.frame(datetime, values)
+      x <- data.frame(datetime, dataset)
       dtP[[raingauges]] <- data.frame( start= x[c(1, diff(x$datetime))>1, ]$datetime, end=x[diff(x$datetime)>1, ]$datetime)
       if ( length(gapsP[[raingauges]])==0 ) {
         print(paste("No gaps in the time series P",raingauges,sep=""))
@@ -47,13 +49,13 @@ findGaps <- function(myTS,deltim) {
       }
     }
   }else{
-    values <- myTS$P
-    datetime <- index(values)
+    dataset <- myTS$P
+    datetime <- index(dataset)
     # Get the range of dates covered
     fullrangeP <- seq(min(datetime), max(datetime), by = 60*multiplier) # by seconds
     # Get the dates in fullrangeP that are not in DF$V2
     gapsP <- fullrangeP[!fullrangeP %in% datetime]
-    x <- data.frame(datetime, values)
+    x <- data.frame(datetime, dataset)
     dtP <- data.frame( start= x[c(1, diff(x$datetime))>1, ]$datetime, end=x[diff(x$datetime)>1, ]$datetime)
     if ( length(gapsP)==0 ) {
       print("No gaps in the time series P")
@@ -62,13 +64,13 @@ findGaps <- function(myTS,deltim) {
     }
   }
 
-  values <- myTS$Q
-  datetime <- index(values)
+  dataset <- myTS$Q
+  datetime <- index(dataset)
   # Get the range of dates covered
   fullrangeQ <- seq(min(datetime), max(datetime), by = 60*multiplier) # by seconds
   # Get the dates in fullrangeQ that are not in DF$V2
   gapsQ <- fullrangeQ[!fullrangeQ %in% datetime]
-  x <- data.frame(datetime, values)
+  x <- data.frame(datetime, dataset)
   dtQ <- data.frame( start= x[c(1, diff(x$datetime))>1, ]$datetime, end=x[diff(x$datetime)>1, ]$datetime)
   if ( length(gapsQ)==0 ) {
     print("No gaps in the time series Q")

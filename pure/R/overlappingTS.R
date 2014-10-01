@@ -4,6 +4,8 @@
 #'
 #' @return list of zoo objects in which each time series is defined for the same overlapping period.
 #'
+#' @author Claudia Vitolo
+#'
 #' @examples
 #' # overlappingTS(myList)
 #'

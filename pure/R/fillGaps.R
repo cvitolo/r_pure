@@ -6,6 +6,8 @@
 #'
 #' @details It uses the fuction na.approx (better not use na.spline, as it generates negative values)
 #'
+#' @author Claudia Vitolo
+#'
 #' @examples
 #' # fillGaps( myList )
 #'

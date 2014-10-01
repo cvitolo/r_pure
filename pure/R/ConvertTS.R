@@ -9,6 +9,8 @@
 #'
 #' @references For the "from" and "to" strings, check the Unidata's udunits reference: http://www.unidata.ucar.edu/software/udunits/
 #'
+#' @author Claudia Vitolo
+#'
 #' @examples
 #' #ConvertTS( dataset, from, to, optionalInput=NA )
 #'

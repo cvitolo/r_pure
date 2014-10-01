@@ -36,7 +36,7 @@ ScanTS <- function(dataset,
 
   if ( verbose == TRUE ){
 
-    cat("#### GENERAL INFO #####################################################")
+    cat("#### GENERAL INFO ##################################################")
     cat("\n")
     cat("\n")
 
@@ -65,9 +65,9 @@ ScanTS <- function(dataset,
 
   percentageNegative <- 0
 
-  if ( any(dataset < 0) ) {
+  if ( any(dataset < 0, na.rm=TRUE ) ) {
 
-    lNeg <- length( which( dataset < 0 ) )
+    lNeg <- length( which( dataset < 0) )
     percentageNegative <- 1 - ((lengthTotal - lNeg)/lengthTotal)
 
     if (percentageNegative > 0){

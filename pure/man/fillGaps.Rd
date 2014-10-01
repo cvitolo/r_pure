@@ -20,4 +20,7 @@ It uses the fuction na.approx (better not use na.spline, as it generates negativ
 \examples{
 # fillGaps( myList )
 }
+\author{
+Claudia Vitolo
+}
 

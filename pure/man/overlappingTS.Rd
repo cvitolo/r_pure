@@ -17,4 +17,7 @@ This function trims a list made of multiple datasets (e.g. multiple rain gauges 
 \examples{
 # overlappingTS(myList)
 }
+\author{
+Claudia Vitolo
+}
 

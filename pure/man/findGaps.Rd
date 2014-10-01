@@ -19,4 +19,7 @@ Finds gaps in time series
 \examples{
 # findGaps( myTS, deltim )
 }
+\author{
+Claudia Vitolo
+}
 

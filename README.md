@@ -31,19 +31,12 @@ library(fuse)
 # Install dependent gists and packages from github:
 library(devtools)
 
-# install_github("r_amca", username = "cvitolo", subdir = "amca")
-library(amca)
-
 # install_github("r_rnrfa", username = "cvitolo", subdir = "rnrfa")
 library(rnrfa)
-source_gist("https://gist.github.com/cvitolo/f9d12402956b88935c38")
 
 # Install pure package
 # install_github("r_pure", username = "cvitolo", subdir = "pure")
 library(pure)
-
-# library(plotly)
-# source("~/Dropbox/Repos/github/r_uncertflood/makePlotly.R")
 ```
 
 Make zoo objects for your time series: 
@@ -61,10 +54,11 @@ data(P2)
 data(P3)
 data(E)
 data(Q)
+data(weather)
 ```
 
 ### Pre-processing
-Below are a series of utility functions for time series pre-processing. Those are divided into 4 sections: 
+Below are a series of utility functions for time series pre-processing, divided in 4 categories: 
 
 * Report
 * Correct
@@ -80,29 +74,70 @@ As an example you can use the example dataset provided with this package.
 ScanTS( P1, verbose = TRUE  )
 ScanTS( P2, verbose = FALSE )
 ScanTS( P3, verbose = FALSE )
-ScanTS( E,  verbose = FALSE, returnNegInfo = FALSE )
 ScanTS( Q,  verbose = FALSE )
+ScanTS( weather$TD,  verbose = FALSE, returnNegInfo = FALSE )
+ScanTS( weather$TW,  verbose = FALSE, returnNegInfo = FALSE )
+ScanTS( weather$NR,  verbose = FALSE, returnNegInfo = FALSE )
+ScanTS( weather$WS,  verbose = FALSE )
 ```
 
-##### Correct
-Correct unrealistis values (e.g. negative P and Q) using the function `CorrectNeg()`. 
-Note E can be negative!
-```R
-P1NoNeg <- CorrectNeg( P1 )
-```
-
+##### Correct, aggregate and prepare for modelling with FUSE
 Often time series are recorded at non-regular time steps. You can shift your records to align them with a regular grid using the function `Irr2Reg()`.
 ```R
-# set a regular time step in days:
-P1Reg <- Irr2Reg( P1NoNeg )
+# From irregular to regular frequency time step:
+P1Reg <- Irr2Reg( P1 )
 P2Reg <- Irr2Reg( P2 )
 P3Reg <- Irr2Reg( P3 )
-EReg  <- Irr2Reg( E )
 QReg  <- Irr2Reg( Q )
+TW    <- Irr2Reg( weather$TW )
+TD    <- Irr2Reg( weather$TD )
+NR    <- Irr2Reg( weather$NR )
+WS    <- Irr2Reg( weather$WS )
 
-plot(P1NoNeg[40:45])
+plot(P1[40:45])
 lines(P1Reg[40:45],col="red")
 ```
+
+Change any unrealistic values to NA (e.g. negative P and Q) using the function `CorrectNeg()`. 
+
+```R
+P1NoNeg <- CorrectNeg( P1Reg )
+
+plot(P1Reg)
+lines(P1NoNeg,col="red")
+```
+
+Set a common temporal resolution and aggregate all the time series
+```R
+myList <- list("P1" = P1NoNeg, "P2" = P2Reg, "P3" = P3Reg, 
+               "E" = EReg, "Q" = QReg, 
+               "TW" = TW, "TD" = TD, "NR" = NR, "WS" = WS)
+multiplier <- CommonTemporalResolution(myList)
+
+temp <- index(as.xts(aggregate(P1, align.time(index(P1), multiplier))))
+P <- zoo(aggregate(P1NoNeg, mean))
+
+P <- aggregate(P1NoNeg,by=rep(temp,), FUN=sum)
+```
+
+Derive new variables, e.g. E from weather variables
+```R
+E <- pet(stationElevation=0,TD,TW,NR,WS)
+```
+
+Aggregate in space, e.g. averal averaging using spatial interpolation methods
+
+Check if there are gaps in the records and infill
+```R
+gaps <- findGaps(regTS,deltim)
+NoGaps <- fullrangeTS(regTS, gaps$fullranges)
+infilled <- fillGaps(NoGaps)
+```
+
+Convert units
+
+##### Aggregate and convert based on FUSE model requirements
+
 
 # Leave your feedback
 I would greatly appreciate if you could leave your feedbacks via email (cvitolodev@gmail.com).

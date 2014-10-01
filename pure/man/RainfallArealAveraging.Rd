@@ -21,4 +21,7 @@ areal averaged time series
 \description{
 Function to calculate the rainfall areal average based on a list of time series (from rain gauges)
 }
+\author{
+Claudia Vitolo
+}
 

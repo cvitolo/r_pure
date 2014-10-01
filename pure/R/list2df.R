@@ -6,6 +6,8 @@
 #'
 #' @details P should contain objects with same length, start and end date-time. Use function overlappingTS. See package hydroTSM for details on the x.ts and x.gis objects.
 #'
+#' @author Claudia Vitolo
+#'
 #' @examples
 #' # list2df(P)
 #'

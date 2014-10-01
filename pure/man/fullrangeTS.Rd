@@ -19,4 +19,7 @@ Create a time series without gaps in recording
 \examples{
 # fullrangeTS( myTS, myRanges )
 }
+\author{
+Claudia Vitolo
+}
 

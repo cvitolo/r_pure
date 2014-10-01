@@ -20,4 +20,7 @@ P should contain objects with same length, start and end date-time. Use function
 \examples{
 # list2df(P)
 }
+\author{
+Claudia Vitolo
+}
 

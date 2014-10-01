@@ -10,7 +10,7 @@
 #' @author Claudia Vitolo
 #'
 #' @examples
-#' # Irr2Reg( dataset, deltim )
+#' # Irr2Reg( dataset )
 #'
 
 Irr2Reg <- function(dataset){
@@ -19,11 +19,12 @@ Irr2Reg <- function(dataset){
   timestep <- median( as.numeric(diff( index(dataset) )) )
   myUnits <- attributes(median( diff( index(dataset) )))$units
 
-  if ( myUnits == "mins"  ) deltim <- timestep
-  if ( myUnits == "hours" ) deltim <- timestep*60
-  if ( myUnits == "days"  )  deltim <- timestep*60*24
+  # calculate the multiplier in seconds
+  if ( myUnits == "secs"  ) multiplier <- timestep
+  if ( myUnits == "mins"  ) multiplier <- timestep*60
+  if ( myUnits == "hours" ) multiplier <- timestep*60*60
+  if ( myUnits == "days"  ) multiplier <- timestep*60*60*24
 
-  multiplier <- 60*deltim # seconds
   newTS <- as.xts(aggregate(dataset, align.time(index(dataset), multiplier)))
 
   return(newTS)

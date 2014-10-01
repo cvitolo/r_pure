@@ -23,6 +23,9 @@ This function converts inputs "from" one unit "to" another.
 \examples{
 #ConvertTS( dataset, from, to, optionalInput=NA )
 }
+\author{
+Claudia Vitolo
+}
 \references{
 For the "from" and "to" strings, check the Unidata's udunits reference: http://www.unidata.ucar.edu/software/udunits/
 }

@@ -5,6 +5,8 @@
 #' @param DataList list of objects from function LoadMyData
 #' @param InterpolationMethod default value is "Thiessen". Available algorithms are: "AritmeticMean", "Thiessen",  "IDW" (Inverse Distance Weighted), "OK" (Ordinary Kriging)
 #'
+#' @author Claudia Vitolo
+#'
 #' @return areal averaged time series
 #'
 

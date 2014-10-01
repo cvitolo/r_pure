@@ -25,4 +25,7 @@ It is possible to ignore Q by setting ignoreQ=TRUE
 \examples{
 #ExtractOverlappingPeriod(P0,E0,Q0,ignoreQ=FALSE)
 }
+\author{
+Claudia Vitolo
+}
 
