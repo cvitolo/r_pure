@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="R pure : Workflow for flood frequency analysis under uncertainty">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>R pure</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/cvitolo/r_pure">View on GitHub</a>
+
+          <h1 id="project_title">R pure</h1>
+          <h2 id="project_tagline">Workflow for flood frequency analysis under uncertainty</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/cvitolo/r_pure/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/cvitolo/r_pure/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="pure-r-package" class="anchor" href="#pure-r-package"><span class="octicon octicon-link"></span></a>PURE (R package)</h1>
+
+<p>Workflow for flood frequency analysis under uncertainty.</p>
+
+<p>Project: PURE (Probability, Uncertainty and Risk in the Environment) - RACER consortium (Flood strand)</p>
+
+<p>Check out: NERC-PURE programme at <a href="http://www.nerc.ac.uk/research/programmes/pure/">http://www.nerc.ac.uk/research/programmes/pure/</a>.</p>
+
+<p>Requirements:
+sudo apt-get install libudunits2-dev
+install.packages("udunits2")
+install.packages("outliers")
+install.packages("hydroTSM")</p>
+
+<h4>
+<a name="basics" class="anchor" href="#basics"><span class="octicon octicon-link"></span></a>Basics</h4>
+
+<p>Install and load packages</p>
+
+<div class="highlight highlight-R"><pre><span class="c1"># Install dependent packages from CRAN:</span>
+x <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"zoo"</span><span class="p">,</span> <span class="s">"chron"</span><span class="p">,</span> <span class="s">"xts"</span><span class="p">,</span> <span class="s">"manipulate"</span><span class="p">,</span> <span class="s">"udunits2"</span><span class="p">,</span> <span class="s">"outliers"</span><span class="p">,</span> <span class="s">"rgdal"</span><span class="p">,</span> 
+       <span class="s">"sp"</span><span class="p">,</span> <span class="s">"gstat"</span><span class="p">,</span> <span class="s">"grid"</span><span class="p">,</span> <span class="s">"hydroTSM"</span><span class="p">,</span> <span class="s">"Hmisc"</span><span class="p">,</span> <span class="s">"raster"</span><span class="p">,</span> <span class="s">"reshape2"</span><span class="p">,</span> 
+       <span class="s">"ggplot2"</span><span class="p">,</span> <span class="s">"qualV"</span><span class="p">,</span> <span class="s">"lhs"</span><span class="p">,</span> <span class="s">"MASS"</span><span class="p">)</span>
+<span class="c1"># install.packages(x)</span>
+<span class="kp">lapply</span><span class="p">(</span>x<span class="p">,</span> <span class="kn">require</span><span class="p">,</span> character.only<span class="o">=</span><span class="bp">T</span><span class="p">);</span> <span class="kp">rm</span><span class="p">(</span>x<span class="p">)</span>
+
+<span class="c1"># Install dpendent package from R-Forge:</span>
+<span class="c1"># install.packages("fuse", repos="http://R-Forge.R-project.org")</span>
+<span class="kn">library</span><span class="p">(</span>fuse<span class="p">)</span>
+
+<span class="c1"># Install dependent gists and packages from github:</span>
+<span class="kn">library</span><span class="p">(</span>devtools<span class="p">)</span>
+
+<span class="c1"># install_github("r_rnrfa", username = "cvitolo", subdir = "rnrfa")</span>
+<span class="kn">library</span><span class="p">(</span>rnrfa<span class="p">)</span>
+
+<span class="c1"># Install pure package</span>
+<span class="c1"># install_github("r_pure", username = "cvitolo", subdir = "pure")</span>
+<span class="kn">library</span><span class="p">(</span>pure<span class="p">)</span>
+</pre></div>
+
+<p>Make zoo objects for your time series: </p>
+
+<ul>
+<li>Q is the streamflow time series. </li>
+<li>E is the list of potential evapotranspiration time series. If E is unknown, wheather variables can be used to calculate the potential evapotranspiration (see section PET).</li>
+<li>P is the list of rainfall time series. If there are 3 raingauges in the catchment (e.g. P1, P2 and P3), the object P is: 
+
+<ul>
+<li>P &lt;- list(P1,P2,P3)</li>
+</ul>
+</li>
+</ul><p>An example is given below:</p>
+
+<div class="highlight highlight-R"><pre><span class="c1"># Load sample time series (this contains 3 objects: P, E and Q)</span>
+data<span class="p">(</span>P1<span class="p">)</span>
+data<span class="p">(</span>P2<span class="p">)</span>
+data<span class="p">(</span>P3<span class="p">)</span>
+data<span class="p">(</span>Q<span class="p">)</span>
+data<span class="p">(</span>weather<span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="pre-processing" class="anchor" href="#pre-processing"><span class="octicon octicon-link"></span></a>Pre-processing</h3>
+
+<p>Below are a series of utility functions for time series pre-processing, divided in 4 categories: </p>
+
+<ul>
+<li>Report</li>
+<li>Correct</li>
+<li>Aggregate</li>
+<li>Model specific preparation</li>
+</ul><h5>
+<a name="report" class="anchor" href="#report"><span class="octicon octicon-link"></span></a>Report</h5>
+
+<p>Report problems with time series using the function <code>ScanTS()</code>.
+As an example you can use the example dataset provided with this package.</p>
+
+<div class="highlight highlight-R"><pre><span class="c1"># Report</span>
+ScanTS<span class="p">(</span> P1<span class="p">,</span> verbose <span class="o">=</span> <span class="kc">TRUE</span>  <span class="p">)</span>
+ScanTS<span class="p">(</span> P2<span class="p">,</span> verbose <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
+ScanTS<span class="p">(</span> P3<span class="p">,</span> verbose <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
+ScanTS<span class="p">(</span> Q<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
+ScanTS<span class="p">(</span> weather<span class="o">$</span>TD<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> returnNegInfo <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
+ScanTS<span class="p">(</span> weather<span class="o">$</span>TW<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> returnNegInfo <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
+ScanTS<span class="p">(</span> weather<span class="o">$</span>NR<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> returnNegInfo <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
+ScanTS<span class="p">(</span> weather<span class="o">$</span>WS<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
+</pre></div>
+
+<h5>
+<a name="correct-aggregate-and-prepare-for-modelling-with-fuse" class="anchor" href="#correct-aggregate-and-prepare-for-modelling-with-fuse"><span class="octicon octicon-link"></span></a>Correct, aggregate and prepare for modelling with FUSE</h5>
+
+<p>Often time series are recorded at non-regular time steps. You can shift your records to align them with a regular grid using the function <code>Irr2Reg()</code>.</p>
+
+<div class="highlight highlight-R"><pre><span class="c1"># From irregular to regular frequency time step:</span>
+P1Reg <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> P1 <span class="p">)</span>
+P2Reg <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> P2 <span class="p">)</span>
+P3Reg <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> P3 <span class="p">)</span>
+QReg  <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> Q <span class="p">)</span>
+TW    <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> weather<span class="o">$</span>TW <span class="p">)</span>
+TD    <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> weather<span class="o">$</span>TD <span class="p">)</span>
+NR    <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> weather<span class="o">$</span>NR <span class="p">)</span>
+WS    <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> weather<span class="o">$</span>WS <span class="p">)</span>
+
+<span class="c1"># test the effect of Irr2Reg()</span>
+plot<span class="p">(</span>P1<span class="p">[</span><span class="m">40</span><span class="o">:</span><span class="m">45</span><span class="p">])</span>
+lines<span class="p">(</span>P1Reg<span class="p">[</span><span class="m">40</span><span class="o">:</span><span class="m">45</span><span class="p">],</span>col<span class="o">=</span><span class="s">"red"</span><span class="p">)</span>
+</pre></div>
+
+<p>Change any unrealistic values to NA (e.g. negative P and Q) using the function <code>CorrectNeg()</code>. </p>
+
+<div class="highlight highlight-R"><pre>P1NoNeg <span class="o">&lt;-</span> CorrectNeg<span class="p">(</span> P1Reg <span class="p">)</span>
+
+<span class="c1"># test the effect of CorrectNeg()</span>
+plot<span class="p">(</span>P1Reg<span class="p">)</span>
+lines<span class="p">(</span>P1NoNeg<span class="p">,</span>col<span class="o">=</span><span class="s">"red"</span><span class="p">)</span>
+</pre></div>
+
+<p>Find coarser temporal resolution amongst a list of time series:</p>
+
+<div class="highlight highlight-R"><pre>myList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1NoNeg<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2Reg<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3Reg<span class="p">,</span> 
+               <span class="s">"Q"</span> <span class="o">=</span> QReg<span class="p">,</span> <span class="s">"TW"</span> <span class="o">=</span> TW<span class="p">,</span> <span class="s">"TD"</span> <span class="o">=</span> TD<span class="p">,</span> <span class="s">"NR"</span> <span class="o">=</span> NR<span class="p">,</span> <span class="s">"WS"</span> <span class="o">=</span> WS<span class="p">)</span>
+multiplier <span class="o">&lt;-</span> CommonTemporalResolution<span class="p">(</span>myList<span class="p">);</span> multiplier
+</pre></div>
+
+<p>Aggregate all the time series to the temporal resolution above:</p>
+
+<div class="highlight highlight-R"><pre>P1 <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>P1<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>P1<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">sum</span><span class="p">)</span>
+P2 <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>P2<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>P2<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">sum</span><span class="p">)</span>
+P3 <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>P3<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>P3<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">sum</span><span class="p">)</span>
+TW <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>TW<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>TW<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
+TD <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>TD<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>TD<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
+NR <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>NR<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>NR<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
+WS <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>WS<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>WS<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
+Q  <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>Q<span class="p">,</span>  align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>Q <span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
+
+plot<span class="p">(</span>myList<span class="o">$</span>Q<span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">100</span><span class="p">])</span>
+lines<span class="p">(</span>Q<span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">100</span><span class="p">],</span>col<span class="o">=</span><span class="s">"red"</span><span class="p">)</span>
+</pre></div>
+
+<p>Derive new variables, e.g. potential evapotranspiration from weather variables</p>
+
+<div class="highlight highlight-R"><pre>E <span class="o">&lt;-</span> pet<span class="p">(</span>stationElevation<span class="o">=</span><span class="m">0</span><span class="p">,</span>TD<span class="p">,</span>TW<span class="p">,</span>NR<span class="p">,</span>WS<span class="p">)</span>
+</pre></div>
+
+<p>Select periods with simultaneous recordings</p>
+
+<div class="highlight highlight-R"><pre>tsList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3<span class="p">,</span> <span class="s">"E"</span> <span class="o">=</span> E<span class="p">,</span> <span class="s">"Q"</span> <span class="o">=</span> Q<span class="p">)</span>
+newList <span class="o">&lt;-</span> ExtractOverlappingPeriod<span class="p">(</span>tsList<span class="p">)</span>
+</pre></div>
+
+<p>Aggregate in space, e.g. areal averaging using spatial interpolation methods</p>
+
+<div class="highlight highlight-R"><pre>tsList <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>index<span class="p">(</span>newList<span class="p">),</span><span class="s">"P1"</span><span class="o">=</span>newList<span class="o">$</span>P1<span class="p">,</span>
+                     <span class="s">"P2"</span><span class="o">=</span>newList<span class="o">$</span>P2<span class="p">,</span><span class="s">"P2"</span><span class="o">=</span>newList<span class="o">$</span>P3<span class="p">)</span>
+P <span class="o">&lt;-</span> ArealAveraging<span class="p">(</span>tsList<span class="p">,</span>areas<span class="o">=</span><span class="kt">c</span><span class="p">(</span><span class="m">0.3</span><span class="p">,</span><span class="m">0.6</span><span class="p">,</span><span class="m">0.1</span><span class="p">),</span>interpolationMethod <span class="o">=</span><span class="s">"Thiessen"</span><span class="p">)</span>
+</pre></div>
+
+<p>Check if there are gaps in the records and infill</p>
+
+<div class="highlight highlight-R"><pre><span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>P<span class="p">))</span> <span class="c1"># FALSE</span>
+
+<span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>newList<span class="o">$</span>E<span class="p">))</span> <span class="c1"># This returns TRUE, therefore we will infill the missing values</span>
+Enomissing <span class="o">&lt;-</span> na.approx<span class="p">(</span>newList<span class="o">$</span>E<span class="p">)</span>
+
+<span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>newList<span class="o">$</span>Q<span class="p">))</span> <span class="c1"># This returns TRUE, therefore we will infill the missing values</span>
+Qnomissing <span class="o">&lt;-</span> na.approx<span class="p">(</span>newList<span class="o">$</span>Q<span class="p">)</span>
+</pre></div>
+
+<p>If necessary, convert units to mm/day:</p>
+
+<div class="highlight highlight-R"><pre>P <span class="o">&lt;-</span> P<span class="o">*</span><span class="m">24</span> <span class="c1"># from mm/h to mm/day</span>
+E <span class="o">&lt;-</span> Enomissing<span class="o">*</span><span class="m">24</span> <span class="c1"># from mm/h to mm/day</span>
+
+Area <span class="o">&lt;-</span> <span class="m">10.55</span> <span class="c1"># Km2</span>
+Q <span class="o">&lt;-</span> Qnomissing<span class="o">*</span><span class="m">86.4</span><span class="o">/</span>Area
+</pre></div>
+
+<p>Merge P, E and Q in 1 time series object</p>
+
+<div class="highlight highlight-R"><pre>DATA <span class="o">&lt;-</span> <span class="kp">merge</span><span class="p">(</span>P<span class="p">,</span>E<span class="p">,</span>Q<span class="p">)</span>
+</pre></div>
+
+<h1>
+<a name="leave-your-feedback" class="anchor" href="#leave-your-feedback"><span class="octicon octicon-link"></span></a>Leave your feedback</h1>
+
+<p>I would greatly appreciate if you could leave your feedbacks via email (<a href="mailto:cvitolodev@gmail.com">cvitolodev@gmail.com</a>).</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">R pure maintained by <a href="https://github.com/cvitolo">cvitolo</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-44379190-4");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
