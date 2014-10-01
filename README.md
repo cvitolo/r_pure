@@ -1,7 +1,7 @@
 PURE (R package)
 ================
 
-Workflow for flood frequency analysis under uncertainty.
+Workflow for flood frequency analysis under uncertainty (work in progress!).
 
 Project: PURE (Probability, Uncertainty and Risk in the Environment) - RACER consortium (Flood strand)
 
