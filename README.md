@@ -173,5 +173,40 @@ Merge P, E and Q in 1 time series object
 DATA <- merge(P,E,Q)
 ```   
 
+### Rainfall-Runoff modelling using FUSE
+As an example, we could combine 50 parameter sets and 4 model structures to generate 200 model simulations.
+
+Sample 50 parameter sets for FUSE, using LHS method
+```R
+library(fuse)
+library(amca)
+data(DATA)
+
+set.seed(123)
+NumberOfRuns <- 10    
+parameters <- GeneratePsetsFUSE(NumberOfRuns)
+```
+
+Choose a list of models to take into account
+```R
+data(modlist)
+
+parentModels <- c(60,230,342,426) # those are the parent models 
+
+ModelList <- modlist[which(modlist$mid %in% parentModels),]
+row.names(ModelList) <- NULL
+```
+
+Run simulations
+```R
+outputFolder <- "~"
+deltim <- multiplier/60/60/24
+warmup <- round(dim(DATA)[1]/10,0)
+
+MCsimulations(DATA,deltim,warmup,parameters,ModelList,outputFolder)
+```
+### Find the best configuration(s) amongst those simulated
+library(amca)
+
 # Leave your feedback
 I would greatly appreciate if you could leave your feedbacks via email (cvitolodev@gmail.com).

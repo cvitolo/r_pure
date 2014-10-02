@@ -1,7 +1,7 @@
 #' This function trims P, E and Q time series to the overlapping period.
 #' It is possible to ignore Q by setting ignoreQ=TRUE
 #'
-#' @param tsList ist of time series (e.g. zoo objects)
+#' @param tsList list of time series (e.g. zoo objects)
 #'
 #' @return list of time series with the same temporal window
 #'
@@ -10,7 +10,6 @@
 #' @examples
 #' # ExtractOverlappingPeriod(tsList)
 #'
-
 
 ExtractOverlappingPeriod <- function(tsList){
 
