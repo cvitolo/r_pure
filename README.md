@@ -21,11 +21,11 @@ Install and load packages
 x <- c("zoo", "chron", "xts", "manipulate", "udunits2", "outliers", "rgdal", 
        "sp", "gstat", "grid", "hydroTSM", "Hmisc", "raster", "reshape2", 
        "ggplot2", "qualV", "lhs", "MASS")
-# install.packages(x)
+install.packages(x)
 lapply(x, require, character.only=T); rm(x)
 
 # Install dpendent package from R-Forge:
-# install.packages("fuse", repos="http://R-Forge.R-project.org")
+install.packages("fuse", repos="http://R-Forge.R-project.org")
 library(fuse)
 
 # Install dependent gists and packages from github:
@@ -35,7 +35,7 @@ library(devtools)
 library(rnrfa)
 
 # Install pure package
-# install_github("r_pure", username = "cvitolo", subdir = "pure")
+install_github("r_pure", username = "cvitolo", subdir = "pure")
 library(pure)
 ```
 
@@ -206,7 +206,23 @@ warmup <- round(dim(DATA)[1]/10,0)
 MCsimulations(DATA,deltim,warmup,parameters,ModelList,outputFolder)
 ```
 ### Find the best configuration(s) amongst those simulated
+For this task it is necessary to install another experimental package called AMCA:
+
+```R
+# Install pure package
+install_github("r_amca", username = "cvitolo", subdir = "amca")
 library(amca)
+```
+
+Run the algorithm:
+```R
+results <- amca(DATA,ModelList,warmup,parameters,outputFolder)
+```
+
+The best configuration is store in
+```R
+results$RETable
+```
 
 # Leave your feedback
 I would greatly appreciate if you could leave your feedbacks via email (cvitolodev@gmail.com).
