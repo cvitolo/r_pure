@@ -34,7 +34,7 @@
         <h1>
 <a name="pure-r-package" class="anchor" href="#pure-r-package"><span class="octicon octicon-link"></span></a>PURE (R package)</h1>
 
-<p>Workflow for flood frequency analysis under uncertainty (still work in progress!).</p>
+<p>Workflow for flood frequency analysis under uncertainty (work in progress!).</p>
 
 <p>Project: PURE (Probability, Uncertainty and Risk in the Environment) - RACER consortium (Flood strand)</p>
 
@@ -55,11 +55,11 @@ install.packages("hydroTSM")</p>
 x <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"zoo"</span><span class="p">,</span> <span class="s">"chron"</span><span class="p">,</span> <span class="s">"xts"</span><span class="p">,</span> <span class="s">"manipulate"</span><span class="p">,</span> <span class="s">"udunits2"</span><span class="p">,</span> <span class="s">"outliers"</span><span class="p">,</span> <span class="s">"rgdal"</span><span class="p">,</span> 
        <span class="s">"sp"</span><span class="p">,</span> <span class="s">"gstat"</span><span class="p">,</span> <span class="s">"grid"</span><span class="p">,</span> <span class="s">"hydroTSM"</span><span class="p">,</span> <span class="s">"Hmisc"</span><span class="p">,</span> <span class="s">"raster"</span><span class="p">,</span> <span class="s">"reshape2"</span><span class="p">,</span> 
        <span class="s">"ggplot2"</span><span class="p">,</span> <span class="s">"qualV"</span><span class="p">,</span> <span class="s">"lhs"</span><span class="p">,</span> <span class="s">"MASS"</span><span class="p">)</span>
-<span class="c1"># install.packages(x)</span>
+install.packages<span class="p">(</span>x<span class="p">)</span>
 <span class="kp">lapply</span><span class="p">(</span>x<span class="p">,</span> <span class="kn">require</span><span class="p">,</span> character.only<span class="o">=</span><span class="bp">T</span><span class="p">);</span> <span class="kp">rm</span><span class="p">(</span>x<span class="p">)</span>
 
 <span class="c1"># Install dpendent package from R-Forge:</span>
-<span class="c1"># install.packages("fuse", repos="http://R-Forge.R-project.org")</span>
+install.packages<span class="p">(</span><span class="s">"fuse"</span><span class="p">,</span> repos<span class="o">=</span><span class="s">"http://R-Forge.R-project.org"</span><span class="p">)</span>
 <span class="kn">library</span><span class="p">(</span>fuse<span class="p">)</span>
 
 <span class="c1"># Install dependent gists and packages from github:</span>
@@ -69,7 +69,7 @@ x <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span>
 <span class="kn">library</span><span class="p">(</span>rnrfa<span class="p">)</span>
 
 <span class="c1"># Install pure package</span>
-<span class="c1"># install_github("r_pure", username = "cvitolo", subdir = "pure")</span>
+install_github<span class="p">(</span><span class="s">"r_pure"</span><span class="p">,</span> username <span class="o">=</span> <span class="s">"cvitolo"</span><span class="p">,</span> subdir <span class="o">=</span> <span class="s">"pure"</span><span class="p">)</span>
 <span class="kn">library</span><span class="p">(</span>pure<span class="p">)</span>
 </pre></div>
 
@@ -213,6 +213,61 @@ Q <span class="o">&lt;-</span> Qnomissing<span class="o">*</span><span class="m"
 <p>Merge P, E and Q in 1 time series object</p>
 
 <div class="highlight highlight-R"><pre>DATA <span class="o">&lt;-</span> <span class="kp">merge</span><span class="p">(</span>P<span class="p">,</span>E<span class="p">,</span>Q<span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="rainfall-runoff-modelling-using-fuse" class="anchor" href="#rainfall-runoff-modelling-using-fuse"><span class="octicon octicon-link"></span></a>Rainfall-Runoff modelling using FUSE</h3>
+
+<p>As an example, we could combine 50 parameter sets and 4 model structures to generate 200 model simulations.</p>
+
+<p>Sample 50 parameter sets for FUSE, using LHS method</p>
+
+<div class="highlight highlight-R"><pre><span class="kn">library</span><span class="p">(</span>fuse<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>amca<span class="p">)</span>
+data<span class="p">(</span>DATA<span class="p">)</span>
+
+<span class="kp">set.seed</span><span class="p">(</span><span class="m">123</span><span class="p">)</span>
+NumberOfRuns <span class="o">&lt;-</span> <span class="m">10</span>    
+parameters <span class="o">&lt;-</span> GeneratePsetsFUSE<span class="p">(</span>NumberOfRuns<span class="p">)</span>
+</pre></div>
+
+<p>Choose a list of models to take into account</p>
+
+<div class="highlight highlight-R"><pre>data<span class="p">(</span>modlist<span class="p">)</span>
+
+parentModels <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="m">60</span><span class="p">,</span><span class="m">230</span><span class="p">,</span><span class="m">342</span><span class="p">,</span><span class="m">426</span><span class="p">)</span> <span class="c1"># those are the parent models </span>
+
+ModelList <span class="o">&lt;-</span> modlist<span class="p">[</span><span class="kp">which</span><span class="p">(</span>modlist<span class="o">$</span>mid <span class="o">%in%</span> parentModels<span class="p">),]</span>
+<span class="kp">row.names</span><span class="p">(</span>ModelList<span class="p">)</span> <span class="o">&lt;-</span> <span class="kc">NULL</span>
+</pre></div>
+
+<p>Run simulations</p>
+
+<div class="highlight highlight-R"><pre>outputFolder <span class="o">&lt;-</span> <span class="s">"~"</span>
+deltim <span class="o">&lt;-</span> multiplier<span class="o">/</span><span class="m">60</span><span class="o">/</span><span class="m">60</span><span class="o">/</span><span class="m">24</span>
+warmup <span class="o">&lt;-</span> <span class="kp">round</span><span class="p">(</span><span class="kp">dim</span><span class="p">(</span>DATA<span class="p">)[</span><span class="m">1</span><span class="p">]</span><span class="o">/</span><span class="m">10</span><span class="p">,</span><span class="m">0</span><span class="p">)</span>
+
+MCsimulations<span class="p">(</span>DATA<span class="p">,</span>deltim<span class="p">,</span>warmup<span class="p">,</span>parameters<span class="p">,</span>ModelList<span class="p">,</span>outputFolder<span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="find-the-best-configurations-amongst-those-simulated" class="anchor" href="#find-the-best-configurations-amongst-those-simulated"><span class="octicon octicon-link"></span></a>Find the best configuration(s) amongst those simulated</h3>
+
+<p>For this task it is necessary to install another experimental package called AMCA:</p>
+
+<div class="highlight highlight-R"><pre><span class="c1"># Install pure package</span>
+install_github<span class="p">(</span><span class="s">"r_amca"</span><span class="p">,</span> username <span class="o">=</span> <span class="s">"cvitolo"</span><span class="p">,</span> subdir <span class="o">=</span> <span class="s">"amca"</span><span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>amca<span class="p">)</span>
+</pre></div>
+
+<p>Run the algorithm:</p>
+
+<div class="highlight highlight-R"><pre>results <span class="o">&lt;-</span> amca<span class="p">(</span>DATA<span class="p">,</span>ModelList<span class="p">,</span>warmup<span class="p">,</span>parameters<span class="p">,</span>outputFolder<span class="p">)</span>
+</pre></div>
+
+<p>The best configuration is store in</p>
+
+<div class="highlight highlight-R"><pre>results<span class="o">$</span>RETable
 </pre></div>
 
 <h1>
