@@ -6,16 +6,17 @@
 #' @param parameters table containing the parameter sets, see \code{GeneratePsetsFUSE}
 #' @param ModelList this is the reduced list of model structures (total number: 240)
 #' @param SimulationFolder path to the folder where the function saves the results
+#' @param MPIs list of functions describing the Model performance Indices
 #' @param verbose if TRUE, it prints details of the current simulation
 #'
 #' @return 2 arrays: R (discharges) and S (indices).
 #'
 #' @examples
-#' # MCsimulations(DATA,deltim,warmup,parameters,ModelList,SimulationFolder)
+#' # MCsimulations(DATA,deltim,warmup,parameters,ModelList,SimulationFolder,MPIs)
 #'
 
 MCsimulations <- function(DATA,deltim,warmup,parameters,ModelList,
-                          SimulationFolder,
+                          SimulationFolder, MPIs,
                           verbose=TRUE){
 
   # library(fuse)
@@ -24,7 +25,7 @@ MCsimulations <- function(DATA,deltim,warmup,parameters,ModelList,
   for (i in 1:dim(ModelList)[1]){ ###!!!
 
     mid <- ModelList[i,"mid"]
-    indices <- data.frame(matrix(NA, nrow=dim(parameters)[1],ncol=5))
+    indices <- data.frame(matrix(NA, nrow=dim(parameters)[1], ncol=length(MPIs) ))
     discharges <- data.frame(matrix(NA, nrow=dim(parameters)[1],ncol=dim(DATA)[1]-warmup))
 
     for (pid in 1:dim(parameters)[1]){
@@ -35,15 +36,19 @@ MCsimulations <- function(DATA,deltim,warmup,parameters,ModelList,
 
       q_routed <- RunFUSE(DATA, ParameterSet, deltim, mid)
 
-      indices[pid,] <- PerformanceIndices(Po=DATA[(warmup + 1):dim(DATA)[1],"P"],
-                                          Qo=DATA[(warmup + 1):dim(DATA)[1],"Q"],
-                                          Qs=q_routed[(warmup + 1):dim(DATA)[1]])
+      x <- data.frame( Po = DATA[(warmup + 1):dim(DATA)[1],"P"],
+                       Qo = DATA[(warmup + 1):dim(DATA)[1],"Q"],
+                       Qs = q_routed[(warmup + 1):dim(DATA)[1]] )
+
+      y <- lapply(MPIs, function(f) sapply(list(x), function(d) f(d) ) )
+
+      indices[pid,] <- as.numeric(as.character(y))
 
       discharges[pid,] <- q_routed[(warmup + 1):dim(DATA)[1]]
 
     }
 
-    names(indices) <- c("LAGTIME","MAE","NSHF","NSLF","RR")
+    names(indices) <- names(MPIs)
 
     save(indices, discharges, file = paste(SimulationFolder,"/MID_",mid,".Rdata",sep=""))
 

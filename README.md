@@ -9,8 +9,6 @@ Check out: NERC-PURE programme at http://www.nerc.ac.uk/research/programmes/pure
 
 Requirements:
 sudo apt-get install libudunits2-dev
-install.packages("udunits2")
-install.packages("outliers")
 install.packages("hydroTSM")
 
 
@@ -18,7 +16,7 @@ install.packages("hydroTSM")
 Install and load packages
 ```R
 # Install dependent packages from CRAN:
-x <- c("zoo", "chron", "xts", "manipulate", "udunits2", "outliers", "rgdal", 
+x <- c("zoo", "chron", "xts", "manipulate", "rgdal", 
        "sp", "gstat", "grid", "hydroTSM", "Hmisc", "raster", "reshape2", 
        "ggplot2", "qualV", "lhs", "MASS")
 install.packages(x)
@@ -30,8 +28,7 @@ library(fuse)
 
 # Install dependent gists and packages from github:
 library(devtools)
-
-# install_github("r_rnrfa", username = "cvitolo", subdir = "rnrfa")
+install_github("r_rnrfa", username = "cvitolo", subdir = "rnrfa")
 library(rnrfa)
 
 # Install pure package
@@ -179,7 +176,6 @@ As an example, we could combine 50 parameter sets and 4 model structures to gene
 Sample 50 parameter sets for FUSE, using LHS method
 ```R
 library(fuse)
-library(amca)
 data(DATA)
 
 set.seed(123)
@@ -190,21 +186,31 @@ parameters <- GeneratePsetsFUSE(NumberOfRuns)
 Choose a list of models to take into account
 ```R
 data(modlist)
-
 parentModels <- c(60,230,342,426) # those are the parent models 
-
 ModelList <- modlist[which(modlist$mid %in% parentModels),]
 row.names(ModelList) <- NULL
+```
+
+Define the list of Model Performance Indices (MPIs)
+```R
+LAGTIME = function(x) lagtime(x$Qo,x$Qs)    
+MAE     = function(x) mean(x$Qs - x$Qo, na.rm = TRUE)            
+NSHF    = function(x) 1 - EF(x$Qo,x$Qs)           
+NSLF    = function(x) 1 - EF( log(x$Qo) , log(x$Qs) )           
+RR      = function(x) sum(x$Qs) /sum(x$Po)
+
+MPIs <- list("LAGTIME"=LAGTIME,"MAE"=MAE,"NSHF"=NSHF,"NSLF"=NSLF,"RR"=RR)
 ```
 
 Run simulations
 ```R
 outputFolder <- "~"
-deltim <- multiplier/60/60/24
+deltim <- 1/24 # or multiplier/60/60/24
 warmup <- round(dim(DATA)[1]/10,0)
 
-MCsimulations(DATA,deltim,warmup,parameters,ModelList,outputFolder)
+MCsimulations(DATA,deltim,warmup,parameters,ModelList,outputFolder,MPIs)
 ```
+
 ### Find the best configuration(s) amongst those simulated
 For this task it is necessary to install another experimental package called AMCA:
 
@@ -219,7 +225,7 @@ Run the algorithm:
 results <- amca(DATA,ModelList,warmup,parameters,outputFolder)
 ```
 
-The best configuration is store in
+The best configuration is stored in
 ```R
 results$RETable
 ```
