@@ -15,7 +15,6 @@ Imports:
     rgdal,
     sp,
     fuse,
-    qualV,
     reshape2,
     ggplot2
 Suggests:

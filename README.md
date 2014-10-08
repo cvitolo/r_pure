@@ -16,7 +16,7 @@ install.packages("hydroTSM")
 Install and load packages
 ```R
 # Install dependent packages from CRAN:
-x <- c("zoo", "chron", "xts", "manipulate", "rgdal", 
+x <- c("zoo", "chron", "xts", "manipulate", "rgdal", "tgp",
        "sp", "gstat", "grid", "hydroTSM", "Hmisc", "raster", "reshape2", 
        "ggplot2", "qualV", "lhs", "MASS")
 install.packages(x)
@@ -105,37 +105,28 @@ plot(P1Reg)
 lines(P1NoNeg,col="red")
 ```
 
-Find coarser temporal resolution amongst a list of time series:
+Find coarser temporal resolution amongst a list of time series and aggregate all of them to the same temporal resolution:
 ```R
 myList <- list("P1" = P1NoNeg, "P2" = P2Reg, "P3" = P3Reg, 
                "Q" = QReg, "TW" = TW, "TD" = TD, "NR" = NR, "WS" = WS)
-multiplier <- CommonTemporalResolution(myList); multiplier
-```
-
-Aggregate all the time series to the temporal resolution above:
-```R
-P1 <- aggregate(myList$P1, align.time(index(myList$P1), multiplier), FUN = sum)
-P2 <- aggregate(myList$P2, align.time(index(myList$P2), multiplier), FUN = sum)
-P3 <- aggregate(myList$P3, align.time(index(myList$P3), multiplier), FUN = sum)
-TW <- aggregate(myList$TW, align.time(index(myList$TW), multiplier), FUN = mean)
-TD <- aggregate(myList$TD, align.time(index(myList$TD), multiplier), FUN = mean)
-NR <- aggregate(myList$NR, align.time(index(myList$NR), multiplier), FUN = mean)
-WS <- aggregate(myList$WS, align.time(index(myList$WS), multiplier), FUN = mean)
-Q  <- aggregate(myList$Q,  align.time(index(myList$Q ), multiplier), FUN = mean)
-
-plot(myList$Q[1:100])
-lines(Q[1:100],col="red")
+x <- CommonTemporalResolution(myList)
 ```
 
 Derive new variables, e.g. potential evapotranspiration from weather variables
 ```R
-E <- pet(stationElevation=0,TD,TW,NR,WS)
+E <- pet(stationElevation=0,x$aggregatedList$TD,x$aggregatedList$TW,
+                            x$aggregatedList$NR,x$aggregatedList$WS)
 ```
 
 Select periods with simultaneous recordings
 ```R
-tsList <- list("P1" = P1, "P2" = P2, "P3" = P3, "E" = E, "Q" = Q)
+tsList <- list("P1" = x$aggregatedList$P1, "P2" = x$aggregatedList$P2, 
+               "P3" = x$aggregatedList$P3, "E" = E, "Q" = x$aggregatedList$Q)
 newList <- ExtractOverlappingPeriod(tsList)
+
+# test
+newList[73:77,1]
+window(P1Reg, start=index(newList[72,1]), end=index(newList[77,1]))
 ```
 
 Aggregate in space, e.g. areal averaging using spatial interpolation methods
@@ -193,6 +184,9 @@ row.names(ModelList) <- NULL
 
 Define the list of Model Performance Indices (MPIs)
 ```R
+library(tiger)
+library(qualV)
+
 LAGTIME = function(x) lagtime(x$Qo,x$Qs)    
 MAE     = function(x) mean(x$Qs - x$Qo, na.rm = TRUE)            
 NSHF    = function(x) 1 - EF(x$Qo,x$Qs)           
@@ -205,9 +199,11 @@ MPIs <- list("LAGTIME"=LAGTIME,"MAE"=MAE,"NSHF"=NSHF,"NSLF"=NSLF,"RR"=RR)
 Run simulations
 ```R
 outputFolder <- "~"
-deltim <- 1/24 # or multiplier/60/60/24
+deltim <- 1/24 # or dt/60/60/24
 warmup <- round(dim(DATA)[1]/10,0)
 
+# It is recommended to run simulations on HPC facilities. 
+# However small batches can be run locally using the function MCsimulations()
 MCsimulations(DATA,deltim,warmup,parameters,ModelList,outputFolder,MPIs)
 ```
 

@@ -4,7 +4,6 @@ import(sp)
 import(zoo)
 import(rgdal)
 import(fuse)
-import(qualV)
 import(reshape2)
 import(ggplot2)
 
