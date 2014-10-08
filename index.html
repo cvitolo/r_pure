@@ -42,8 +42,6 @@
 
 <p>Requirements:
 sudo apt-get install libudunits2-dev
-install.packages("udunits2")
-install.packages("outliers")
 install.packages("hydroTSM")</p>
 
 <h4>
@@ -52,7 +50,7 @@ install.packages("hydroTSM")</p>
 <p>Install and load packages</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># Install dependent packages from CRAN:</span>
-x <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"zoo"</span><span class="p">,</span> <span class="s">"chron"</span><span class="p">,</span> <span class="s">"xts"</span><span class="p">,</span> <span class="s">"manipulate"</span><span class="p">,</span> <span class="s">"udunits2"</span><span class="p">,</span> <span class="s">"outliers"</span><span class="p">,</span> <span class="s">"rgdal"</span><span class="p">,</span> 
+x <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"zoo"</span><span class="p">,</span> <span class="s">"chron"</span><span class="p">,</span> <span class="s">"xts"</span><span class="p">,</span> <span class="s">"manipulate"</span><span class="p">,</span> <span class="s">"rgdal"</span><span class="p">,</span> <span class="s">"tgp"</span><span class="p">,</span>
        <span class="s">"sp"</span><span class="p">,</span> <span class="s">"gstat"</span><span class="p">,</span> <span class="s">"grid"</span><span class="p">,</span> <span class="s">"hydroTSM"</span><span class="p">,</span> <span class="s">"Hmisc"</span><span class="p">,</span> <span class="s">"raster"</span><span class="p">,</span> <span class="s">"reshape2"</span><span class="p">,</span> 
        <span class="s">"ggplot2"</span><span class="p">,</span> <span class="s">"qualV"</span><span class="p">,</span> <span class="s">"lhs"</span><span class="p">,</span> <span class="s">"MASS"</span><span class="p">)</span>
 install.packages<span class="p">(</span>x<span class="p">)</span>
@@ -64,8 +62,7 @@ install.packages<span class="p">(</span><span class="s">"fuse"</span><span class
 
 <span class="c1"># Install dependent gists and packages from github:</span>
 <span class="kn">library</span><span class="p">(</span>devtools<span class="p">)</span>
-
-<span class="c1"># install_github("r_rnrfa", username = "cvitolo", subdir = "rnrfa")</span>
+install_github<span class="p">(</span><span class="s">"r_rnrfa"</span><span class="p">,</span> username <span class="o">=</span> <span class="s">"cvitolo"</span><span class="p">,</span> subdir <span class="o">=</span> <span class="s">"rnrfa"</span><span class="p">)</span>
 <span class="kn">library</span><span class="p">(</span>rnrfa<span class="p">)</span>
 
 <span class="c1"># Install pure package</span>
@@ -150,37 +147,28 @@ plot<span class="p">(</span>P1Reg<span class="p">)</span>
 lines<span class="p">(</span>P1NoNeg<span class="p">,</span>col<span class="o">=</span><span class="s">"red"</span><span class="p">)</span>
 </pre></div>
 
-<p>Find coarser temporal resolution amongst a list of time series:</p>
+<p>Find coarser temporal resolution amongst a list of time series and aggregate all of them to the same temporal resolution:</p>
 
 <div class="highlight highlight-R"><pre>myList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1NoNeg<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2Reg<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3Reg<span class="p">,</span> 
                <span class="s">"Q"</span> <span class="o">=</span> QReg<span class="p">,</span> <span class="s">"TW"</span> <span class="o">=</span> TW<span class="p">,</span> <span class="s">"TD"</span> <span class="o">=</span> TD<span class="p">,</span> <span class="s">"NR"</span> <span class="o">=</span> NR<span class="p">,</span> <span class="s">"WS"</span> <span class="o">=</span> WS<span class="p">)</span>
-multiplier <span class="o">&lt;-</span> CommonTemporalResolution<span class="p">(</span>myList<span class="p">);</span> multiplier
-</pre></div>
-
-<p>Aggregate all the time series to the temporal resolution above:</p>
-
-<div class="highlight highlight-R"><pre>P1 <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>P1<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>P1<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">sum</span><span class="p">)</span>
-P2 <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>P2<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>P2<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">sum</span><span class="p">)</span>
-P3 <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>P3<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>P3<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">sum</span><span class="p">)</span>
-TW <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>TW<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>TW<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
-TD <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>TD<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>TD<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
-NR <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>NR<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>NR<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
-WS <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>WS<span class="p">,</span> align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>WS<span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
-Q  <span class="o">&lt;-</span> aggregate<span class="p">(</span>myList<span class="o">$</span>Q<span class="p">,</span>  align.time<span class="p">(</span>index<span class="p">(</span>myList<span class="o">$</span>Q <span class="p">),</span> multiplier<span class="p">),</span> FUN <span class="o">=</span> <span class="kp">mean</span><span class="p">)</span>
-
-plot<span class="p">(</span>myList<span class="o">$</span>Q<span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">100</span><span class="p">])</span>
-lines<span class="p">(</span>Q<span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">100</span><span class="p">],</span>col<span class="o">=</span><span class="s">"red"</span><span class="p">)</span>
+x <span class="o">&lt;-</span> CommonTemporalResolution<span class="p">(</span>myList<span class="p">)</span>
 </pre></div>
 
 <p>Derive new variables, e.g. potential evapotranspiration from weather variables</p>
 
-<div class="highlight highlight-R"><pre>E <span class="o">&lt;-</span> pet<span class="p">(</span>stationElevation<span class="o">=</span><span class="m">0</span><span class="p">,</span>TD<span class="p">,</span>TW<span class="p">,</span>NR<span class="p">,</span>WS<span class="p">)</span>
+<div class="highlight highlight-R"><pre>E <span class="o">&lt;-</span> pet<span class="p">(</span>stationElevation<span class="o">=</span><span class="m">0</span><span class="p">,</span>x<span class="o">$</span>aggregatedList<span class="o">$</span>TD<span class="p">,</span>x<span class="o">$</span>aggregatedList<span class="o">$</span>TW<span class="p">,</span>
+                            x<span class="o">$</span>aggregatedList<span class="o">$</span>NR<span class="p">,</span>x<span class="o">$</span>aggregatedList<span class="o">$</span>WS<span class="p">)</span>
 </pre></div>
 
 <p>Select periods with simultaneous recordings</p>
 
-<div class="highlight highlight-R"><pre>tsList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3<span class="p">,</span> <span class="s">"E"</span> <span class="o">=</span> E<span class="p">,</span> <span class="s">"Q"</span> <span class="o">=</span> Q<span class="p">)</span>
+<div class="highlight highlight-R"><pre>tsList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> x<span class="o">$</span>aggregatedList<span class="o">$</span>P1<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> x<span class="o">$</span>aggregatedList<span class="o">$</span>P2<span class="p">,</span> 
+               <span class="s">"P3"</span> <span class="o">=</span> x<span class="o">$</span>aggregatedList<span class="o">$</span>P3<span class="p">,</span> <span class="s">"E"</span> <span class="o">=</span> E<span class="p">,</span> <span class="s">"Q"</span> <span class="o">=</span> x<span class="o">$</span>aggregatedList<span class="o">$</span>Q<span class="p">)</span>
 newList <span class="o">&lt;-</span> ExtractOverlappingPeriod<span class="p">(</span>tsList<span class="p">)</span>
+
+<span class="c1"># test</span>
+newList<span class="p">[</span><span class="m">73</span><span class="o">:</span><span class="m">77</span><span class="p">,</span><span class="m">1</span><span class="p">]</span>
+window<span class="p">(</span>P1Reg<span class="p">,</span> start<span class="o">=</span>index<span class="p">(</span>newList<span class="p">[</span><span class="m">72</span><span class="p">,</span><span class="m">1</span><span class="p">]),</span> end<span class="o">=</span>index<span class="p">(</span>newList<span class="p">[</span><span class="m">77</span><span class="p">,</span><span class="m">1</span><span class="p">]))</span>
 </pre></div>
 
 <p>Aggregate in space, e.g. areal averaging using spatial interpolation methods</p>
@@ -223,7 +211,6 @@ Q <span class="o">&lt;-</span> Qnomissing<span class="o">*</span><span class="m"
 <p>Sample 50 parameter sets for FUSE, using LHS method</p>
 
 <div class="highlight highlight-R"><pre><span class="kn">library</span><span class="p">(</span>fuse<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>amca<span class="p">)</span>
 data<span class="p">(</span>DATA<span class="p">)</span>
 
 <span class="kp">set.seed</span><span class="p">(</span><span class="m">123</span><span class="p">)</span>
@@ -234,20 +221,34 @@ parameters <span class="o">&lt;-</span> GeneratePsetsFUSE<span class="p">(</span
 <p>Choose a list of models to take into account</p>
 
 <div class="highlight highlight-R"><pre>data<span class="p">(</span>modlist<span class="p">)</span>
-
 parentModels <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="m">60</span><span class="p">,</span><span class="m">230</span><span class="p">,</span><span class="m">342</span><span class="p">,</span><span class="m">426</span><span class="p">)</span> <span class="c1"># those are the parent models </span>
-
 ModelList <span class="o">&lt;-</span> modlist<span class="p">[</span><span class="kp">which</span><span class="p">(</span>modlist<span class="o">$</span>mid <span class="o">%in%</span> parentModels<span class="p">),]</span>
 <span class="kp">row.names</span><span class="p">(</span>ModelList<span class="p">)</span> <span class="o">&lt;-</span> <span class="kc">NULL</span>
+</pre></div>
+
+<p>Define the list of Model Performance Indices (MPIs)</p>
+
+<div class="highlight highlight-R"><pre><span class="kn">library</span><span class="p">(</span>tiger<span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>qualV<span class="p">)</span>
+
+LAGTIME <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> lagtime<span class="p">(</span>x<span class="o">$</span>Qo<span class="p">,</span>x<span class="o">$</span>Qs<span class="p">)</span>    
+MAE     <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> <span class="kp">mean</span><span class="p">(</span>x<span class="o">$</span>Qs <span class="o">-</span> x<span class="o">$</span>Qo<span class="p">,</span> na.rm <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>            
+NSHF    <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> <span class="m">1</span> <span class="o">-</span> EF<span class="p">(</span>x<span class="o">$</span>Qo<span class="p">,</span>x<span class="o">$</span>Qs<span class="p">)</span>           
+NSLF    <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> <span class="m">1</span> <span class="o">-</span> EF<span class="p">(</span> <span class="kp">log</span><span class="p">(</span>x<span class="o">$</span>Qo<span class="p">)</span> <span class="p">,</span> <span class="kp">log</span><span class="p">(</span>x<span class="o">$</span>Qs<span class="p">)</span> <span class="p">)</span>           
+RR      <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> <span class="kp">sum</span><span class="p">(</span>x<span class="o">$</span>Qs<span class="p">)</span> <span class="o">/</span><span class="kp">sum</span><span class="p">(</span>x<span class="o">$</span>Po<span class="p">)</span>
+
+MPIs <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"LAGTIME"</span><span class="o">=</span>LAGTIME<span class="p">,</span><span class="s">"MAE"</span><span class="o">=</span>MAE<span class="p">,</span><span class="s">"NSHF"</span><span class="o">=</span>NSHF<span class="p">,</span><span class="s">"NSLF"</span><span class="o">=</span>NSLF<span class="p">,</span><span class="s">"RR"</span><span class="o">=</span>RR<span class="p">)</span>
 </pre></div>
 
 <p>Run simulations</p>
 
 <div class="highlight highlight-R"><pre>outputFolder <span class="o">&lt;-</span> <span class="s">"~"</span>
-deltim <span class="o">&lt;-</span> multiplier<span class="o">/</span><span class="m">60</span><span class="o">/</span><span class="m">60</span><span class="o">/</span><span class="m">24</span>
+deltim <span class="o">&lt;-</span> <span class="m">1</span><span class="o">/</span><span class="m">24</span> <span class="c1"># or dt/60/60/24</span>
 warmup <span class="o">&lt;-</span> <span class="kp">round</span><span class="p">(</span><span class="kp">dim</span><span class="p">(</span>DATA<span class="p">)[</span><span class="m">1</span><span class="p">]</span><span class="o">/</span><span class="m">10</span><span class="p">,</span><span class="m">0</span><span class="p">)</span>
 
-MCsimulations<span class="p">(</span>DATA<span class="p">,</span>deltim<span class="p">,</span>warmup<span class="p">,</span>parameters<span class="p">,</span>ModelList<span class="p">,</span>outputFolder<span class="p">)</span>
+<span class="c1"># It is recommended to run simulations on HPC facilities. </span>
+<span class="c1"># However small batches can be run locally using the function MCsimulations()</span>
+MCsimulations<span class="p">(</span>DATA<span class="p">,</span>deltim<span class="p">,</span>warmup<span class="p">,</span>parameters<span class="p">,</span>ModelList<span class="p">,</span>outputFolder<span class="p">,</span>MPIs<span class="p">)</span>
 </pre></div>
 
 <h3>
@@ -265,7 +266,7 @@ install_github<span class="p">(</span><span class="s">"r_amca"</span><span class
 <div class="highlight highlight-R"><pre>results <span class="o">&lt;-</span> amca<span class="p">(</span>DATA<span class="p">,</span>ModelList<span class="p">,</span>warmup<span class="p">,</span>parameters<span class="p">,</span>outputFolder<span class="p">)</span>
 </pre></div>
 
-<p>The best configuration is store in</p>
+<p>The best configuration is stored in</p>
 
 <div class="highlight highlight-R"><pre>results<span class="o">$</span>RETable
 </pre></div>
