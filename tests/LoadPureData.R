@@ -1,4 +1,4 @@
-#' Load data for any of the case studies (13 + 2).
+#' Load data for any of the PURE case studies (13 + 2).
 #'
 #' @param CatchmentName this is a one-word string containing the name of the
 #'        catchment. Accepted values are: "Eden" or "Pontbren"
@@ -27,10 +27,10 @@
 #' @author Claudia Vitolo
 #'
 #' @examples
-#' # LoadMyData(CatchmentName="Eden",SubcatchmentName=2, datafolder="/home/data/")
+#' # LoadPureData(CatchmentName="Pontbren",SubcatchmentName=9, datafolder="/home/data/")
 #'
 
-LoadMyData <- function(CatchmentName,SubcatchmentName, datafolder){
+LoadPureData <- function(CatchmentName,SubcatchmentName, datafolder){
 
   # LOAD DATA
   if (CatchmentName == "Pontbren") {

@@ -7,10 +7,10 @@
 #' @author Claudia Vitolo
 #'
 #' @examples
-#' # overlappingTS(myList)
+#' # OverlappingTS(myList)
 #'
 
-overlappingTS <- function(myList){
+OverlappingTS <- function(myList){
 
   if ( typeof(myList$P)=="list"  ){
     P <- as.list(zoo(do.call("merge", Map(as.zoo, c(myList$P, all = FALSE)))))
