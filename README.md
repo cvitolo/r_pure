@@ -105,23 +105,31 @@ plot(P1Reg)
 lines(P1NoNeg,col="red")
 ```
 
-Find coarser temporal resolution amongst a list of time series and aggregate all of them to the same temporal resolution:
+# Find coarser temporal resolution (in seconds!) amongst a list of time series and aggregate all of them to the same temporal resolution
 ```R
 myList <- list("P1" = P1NoNeg, "P2" = P2Reg, "P3" = P3Reg, 
                "Q" = QReg, "TW" = TW, "TD" = TD, "NR" = NR, "WS" = WS)
 x <- CommonTemporalResolution(myList)
+
+# use "mean" for rates, "sum" for volumes
+P1 <- period.apply(myList$P1, endpoints(myList$P1, "seconds", x), mean)
+P2 <- period.apply(myList$P2, endpoints(myList$P2, "seconds", x), mean)
+P3 <- period.apply(myList$P3, endpoints(myList$P3, "seconds", x), mean)
+TW <- period.apply(myList$TW, endpoints(myList$TW, "seconds", x), mean)
+TD <- period.apply(myList$TD, endpoints(myList$TD, "seconds", x), mean)
+NR <- period.apply(myList$NR, endpoints(myList$NR, "seconds", x), mean)
+WS <- period.apply(myList$WS, endpoints(myList$WS, "seconds", x), mean)
+Q  <- period.apply(myList$Q,  endpoints(myList$Q,  "seconds", x), mean)
 ```
 
 Derive new variables, e.g. potential evapotranspiration from weather variables
 ```R
-E <- pet(stationElevation=0,x$aggregatedList$TD,x$aggregatedList$TW,
-                            x$aggregatedList$NR,x$aggregatedList$WS)
+E <- pet(stationElevation=0,TD,TW,NR,WS)
 ```
 
 Select periods with simultaneous recordings
 ```R
-tsList <- list("P1" = x$aggregatedList$P1, "P2" = x$aggregatedList$P2, 
-               "P3" = x$aggregatedList$P3, "E" = E, "Q" = x$aggregatedList$Q)
+tsList <- list("P1" = P1, "P2" = P2, "P3" = P3, "E" = E, "Q" = Q)
 newList <- ExtractOverlappingPeriod(tsList)
 
 # test
