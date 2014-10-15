@@ -34,22 +34,24 @@ CommonTemporalResolution <- function(myList){
 
   maxMultiplier <- max(multiplier)
 
-  newList <- sapply(names(myList), function(x) NULL)
-  counter <- 0
+#   newList <- sapply(names(myList), function(x) NULL)
+#   counter <- 0
+#
+#   for (dataset in myList){
+#
+#     counter <- counter + 1
+#     m <- maxMultiplier/multiplier[counter]
+#
+#      newList[[counter]] <- aggregate(dataset,
+#                                      align.time(index(dataset), maxMultiplier),
+#                                      FUN = mean)*m
+#
+#   }
+#
+#   names(newList) <- names(myList)
+#
+#   return( list("maxMultiplier" = maxMultiplier, "aggregatedList" = newList) )
 
-  for (dataset in myList){
-
-    counter <- counter + 1
-    m <- maxMultiplier/multiplier[counter]
-
-     newList[[counter]] <- aggregate(dataset,
-                                     align.time(index(dataset), maxMultiplier),
-                                     FUN = mean)*m
-
-  }
-
-  names(newList) <- names(myList)
-
-  return( list("maxMultiplier" = maxMultiplier, "aggregatedList" = newList) )
+  return(maxMultiplier)
 
 }

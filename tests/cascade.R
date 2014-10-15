@@ -1,46 +1,165 @@
+# Install/load libraries
+x <- c("zoo", "chron", "xts", "manipulate", "rgdal", "tgp", "rgdal",
+       "sp", "gstat", "grid", "hydroTSM", "Hmisc", "raster", "reshape2",
+       "ggplot2", "qualV", "lhs", "MASS",
+       "amca","fuse","pure")
+# install.packages(x)
+lapply(x, require, character.only=T); rm(x)
+source('~/Dropbox/Repos/github/r_pure/tests/LoadPureData.R')
 
+# set the path to the input files folder (NOTE: do not use ~ for home folder, rgdal does not like it!)
+datafolder <- "/home/claudia/Dropbox/Projects/PURE/PURE_shared/Data/"
 
-# install_github("r_amca", username = "cvitolo", subdir = "amca")
-# library(amca)
-
-
-
-# library(plotly)
-# source("~/Dropbox/Repos/github/r_uncertflood/makePlotly.R")
-
-#for Nathan's functions
-library(lhs)
-library(MASS)
-
-#for Claudia's functions
-library(manipulate)
-library(Hmisc)
-library(ggplot2)
-library(reshape)
-library(raster)
-library(xts)
-#library(plotly)
-#source("~/Dropbox/Repos/github/r_uncertflood/makePlotly.R")
-
-library(fuse)
-library(damach)
-library(uncertflood)
-library(rnrfa)
-# set bounding box
-bb <- list("LonMin"=-3.4477329, "LonMax"=-3.3914280, "LatMin"=52.632490, "LatMax"=52.656863)
-x <- getStationSummary(bb$LonMin, bb$LonMax, bb$LatMin, bb$LatMax)
-
-# Use data from PURE database:
+# Extract data for Pontbren, subcatchment 9
 CatchmentName <- "Pontbren"
 SubcatchmentName <- 9
 deltim <- 1/24
-# do not use ~ for home folder, rgdal does not like it!
-datafolder <- "/home/claudia/Dropbox/Projects/PURE/PURE_shared/Data/"
-# datafolder <- ifelse(getwd()=="/home/cvitolo/ModelCascade","/home/cvitolo/ModelCascade/data/","/home/claudia/Dropbox/PURE/Data/")
+DataList <- LoadPureData(CatchmentName,SubcatchmentName,datafolder)
 
-# ########## Load data (TS + GIS files) ##########
+# explore the content of DataList using:
+# names(DataList)
+# str(DataList)
+# in this case there are 3 rain gauges in the area: "P2" "P3" "P5" (10 minutes)
+# evapotranspiration calculated from MORECS (1 time series, 1 hour)
+# streamflow (1 time series, 15 minutes)
 
-DataList <- LoadMyData(CatchmentName,SubcatchmentName,datafolder)
+# Report
+ScanTS( DataList$P$P2, verbose = TRUE  )
+ScanTS( DataList$P$P3)
+ScanTS( DataList$P$P5)
+ScanTS( DataList$E, returnNegInfo = FALSE )
+ScanTS( DataList$Q )
+
+##### Correct, aggregate and prepare for modelling with FUSE
+# Often time series are recorded at non-regular time steps. You can shift your records to align them with a regular grid using the function `Irr2Reg()`.
+
+# From irregular to regular frequency time step:
+P2Reg <- Irr2Reg( DataList$P$P2 )
+P3Reg <- Irr2Reg( DataList$P$P3 )
+P5Reg <- Irr2Reg( DataList$P$P5 )
+QReg  <- Irr2Reg( DataList$Q )
+
+# test the effect of Irr2Reg()
+plot(DataList$P$P2[1:100])
+lines(P2Reg[1:100],col="red")
+
+# Pontbren does not have any unrealistic values. If there were some, they could be changed to NA using the function `CorrectNeg()`.
+
+# Find coarser temporal resolution (in seconds!) amongst a list of time series
+myList <- list("P2" = P2Reg, "P3" = P3Reg, "P5" = P5Reg,
+               "Q" = QReg, "E" = DataList$E)
+x <- CommonTemporalResolution(myList)
+
+# and aggregate all of them to the same temporal resolution
+P2 <- period.apply(myList$P2, endpoints(myList$P2, "seconds", x), mean)
+P3 <- period.apply(myList$P3, endpoints(myList$P3, "seconds", x), mean)
+P5 <- period.apply(myList$P5, endpoints(myList$P5, "seconds", x), mean)
+E  <- period.apply(myList$E,  endpoints(myList$E, "seconds",  x), mean)
+Q  <- period.apply(myList$Q,  endpoints(myList$Q, "seconds",  x), mean)
+
+# There are no new variables to derive, e.g. potential evapotranspiration from weather variables (in case, use the function pet())
+
+# Select periods with simultaneous recordings
+tsList <- list("P2" = P2,
+               "P3" = P3,
+               "P5" = P5,
+               "E"  = E,
+               "Q"  = Q)
+newList <- ExtractOverlappingPeriod(tsList)
+
+# Aggregate in space, e.g. areal averaging using spatial interpolation methods
+tsList <- data.frame(index(newList),"P2"=newList$P2,
+                     "P3"=newList$P3,"P5"=newList$P5)
+P <- ArealAveraging(tsList,areas=DataList$A,interpolationMethod ="Thiessen")
+
+# Check if there are gaps in the records and infill
+any(is.na(P)) # FALSE
+
+any(is.na(newList$E)) # FALSE
+
+any(is.na(newList$Q)) # This returns TRUE, therefore we will infill the missing values
+Qnomissing <- na.approx(newList$Q)
+
+# If necessary, convert units to mm/day:
+P <- P*24             # from mm/h to mm/day
+E <- newList$E*24     # from mm/h to mm/day
+
+Area <- DataList$Area # Km2
+Q <- Qnomissing*86.4/Area
+
+# Merge P, E and Q in 1 time series object
+DATA <- merge(P,E,Q)
+
+### Rainfall-Runoff modelling using FUSE
+# As an example, we could combine 50 parameter sets and 4 model structures to generate 200 model simulations.
+
+# Sample 50 parameter sets for FUSE, using LHS method
+library(fuse)
+data(DATA)
+
+set.seed(123)
+NumberOfRuns <- 10
+parameters <- GeneratePsetsFUSE(NumberOfRuns)
+
+# Choose a list of models to take into account
+data(modlist)
+parentModels <- c(60,230,342,426) # those are the parent models
+ModelList <- modlist[which(modlist$mid %in% parentModels),]
+row.names(ModelList) <- NULL
+
+# Define the list of Model Performance Indices (MPIs)
+library(tiger)
+library(qualV)
+
+LAGTIME = function(x) lagtime(x$Qo,x$Qs)
+MAE     = function(x) mean(x$Qs - x$Qo, na.rm = TRUE)
+NSHF    = function(x) 1 - EF(x$Qo,x$Qs)
+NSLF    = function(x) 1 - EF( log(x$Qo) , log(x$Qs) )
+RR      = function(x) sum(x$Qs) /sum(x$Po)
+
+MPIs <- list("LAGTIME"=LAGTIME,"MAE"=MAE,"NSHF"=NSHF,"NSLF"=NSLF,"RR"=RR)
+
+# Run simulations
+outputFolder <- "~"
+deltim <- 1/24 # or dt/60/60/24
+warmup <- round(dim(DATA)[1]/10,0)
+
+# It is recommended to run simulations on HPC facilities.
+# However small batches can be run locally using the function MCsimulations()
+MCsimulations(DATA,deltim,warmup,parameters,ModelList,outputFolder,MPIs)
+
+
+### Find the best configuration(s) amongst those simulated
+
+# Run the algorithm
+results <- amca(DATA,ModelList,warmup,parameters,outputFolder)
+
+# The best configuration is stored in
+results$RETable
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 exampleTimeSeries <- list("P"=list("P1"=DataList$P$P2,"P2"=DataList$P$P3,"P3"=DataList$P$P5),"E"=DataList$E,"Q"=DataList$Q)
 save(exampleTimeSeries,file="data/exampleTimeseries.rda")
