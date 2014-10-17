@@ -105,7 +105,8 @@ plot(P1Reg)
 lines(P1NoNeg,col="red")
 ```
 
-# Find coarser temporal resolution (in seconds!) amongst a list of time series and aggregate all of them to the same temporal resolution
+# Common temporal resolution
+Find coarser temporal resolution (in seconds!) amongst a list of time series and aggregate all of them to the same temporal resolution
 ```R
 myList <- list("P1" = P1NoNeg, "P2" = P2Reg, "P3" = P3Reg, 
                "Q" = QReg, "TW" = TW, "TD" = TD, "NR" = NR, "WS" = WS)
@@ -141,7 +142,9 @@ Aggregate in space, e.g. areal averaging using spatial interpolation methods
 ```R
 tsList <- data.frame(index(newList),"P1"=newList$P1,
                      "P2"=newList$P2,"P2"=newList$P3)
-P <- ArealAveraging(tsList,areas=c(0.3,0.6,0.1),interpolationMethod ="Thiessen")
+                     
+P <- ArealAveraging(tsList,areas=c(0.3,0.6,0.1),
+                    interpolationMethod ="Thiessen")
 ```
 
 Check if there are gaps in the records and infill
