@@ -152,7 +152,9 @@ lines<span class="p">(</span>P1NoNeg<span class="p">,</span>col<span class="o">=
 </pre></div>
 
 <h1>
-<a name="find-coarser-temporal-resolution-in-seconds-amongst-a-list-of-time-series-and-aggregate-all-of-them-to-the-same-temporal-resolution" class="anchor" href="#find-coarser-temporal-resolution-in-seconds-amongst-a-list-of-time-series-and-aggregate-all-of-them-to-the-same-temporal-resolution"><span class="octicon octicon-link"></span></a>Find coarser temporal resolution (in seconds!) amongst a list of time series and aggregate all of them to the same temporal resolution</h1>
+<a name="common-temporal-resolution" class="anchor" href="#common-temporal-resolution"><span class="octicon octicon-link"></span></a>Common temporal resolution</h1>
+
+<p>Find coarser temporal resolution (in seconds!) amongst a list of time series and aggregate all of them to the same temporal resolution</p>
 
 <div class="highlight highlight-R"><pre>myList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1NoNeg<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2Reg<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3Reg<span class="p">,</span> 
                <span class="s">"Q"</span> <span class="o">=</span> QReg<span class="p">,</span> <span class="s">"TW"</span> <span class="o">=</span> TW<span class="p">,</span> <span class="s">"TD"</span> <span class="o">=</span> TD<span class="p">,</span> <span class="s">"NR"</span> <span class="o">=</span> NR<span class="p">,</span> <span class="s">"WS"</span> <span class="o">=</span> WS<span class="p">)</span>
@@ -188,7 +190,9 @@ window<span class="p">(</span>P1Reg<span class="p">,</span> start<span class="o"
 
 <div class="highlight highlight-R"><pre>tsList <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>index<span class="p">(</span>newList<span class="p">),</span><span class="s">"P1"</span><span class="o">=</span>newList<span class="o">$</span>P1<span class="p">,</span>
                      <span class="s">"P2"</span><span class="o">=</span>newList<span class="o">$</span>P2<span class="p">,</span><span class="s">"P2"</span><span class="o">=</span>newList<span class="o">$</span>P3<span class="p">)</span>
-P <span class="o">&lt;-</span> ArealAveraging<span class="p">(</span>tsList<span class="p">,</span>areas<span class="o">=</span><span class="kt">c</span><span class="p">(</span><span class="m">0.3</span><span class="p">,</span><span class="m">0.6</span><span class="p">,</span><span class="m">0.1</span><span class="p">),</span>interpolationMethod <span class="o">=</span><span class="s">"Thiessen"</span><span class="p">)</span>
+
+P <span class="o">&lt;-</span> ArealAveraging<span class="p">(</span>tsList<span class="p">,</span>areas<span class="o">=</span><span class="kt">c</span><span class="p">(</span><span class="m">0.3</span><span class="p">,</span><span class="m">0.6</span><span class="p">,</span><span class="m">0.1</span><span class="p">),</span>
+                    interpolationMethod <span class="o">=</span><span class="s">"Thiessen"</span><span class="p">)</span>
 </pre></div>
 
 <p>Check if there are gaps in the records and infill</p>
