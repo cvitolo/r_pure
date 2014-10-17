@@ -81,7 +81,9 @@ install_github<span class="p">(</span><span class="s">"r_pure"</span><span class
 <li>P &lt;- list(P1,P2,P3)</li>
 </ul>
 </li>
-</ul><p>An example is given below:</p>
+</ul>
+
+<p>An example is given below:</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># Load sample time series (this contains 3 objects: P, E and Q)</span>
 data<span class="p">(</span>P1<span class="p">)</span>
@@ -101,7 +103,9 @@ data<span class="p">(</span>weather<span class="p">)</span>
 <li>Correct</li>
 <li>Aggregate</li>
 <li>Model specific preparation</li>
-</ul><h5>
+</ul>
+
+<h5>
 <a name="report" class="anchor" href="#report"><span class="octicon octicon-link"></span></a>Report</h5>
 
 <p>Report problems with time series using the function <code>ScanTS()</code>.
@@ -147,23 +151,32 @@ plot<span class="p">(</span>P1Reg<span class="p">)</span>
 lines<span class="p">(</span>P1NoNeg<span class="p">,</span>col<span class="o">=</span><span class="s">"red"</span><span class="p">)</span>
 </pre></div>
 
-<p>Find coarser temporal resolution amongst a list of time series and aggregate all of them to the same temporal resolution:</p>
+<h1>
+<a name="find-coarser-temporal-resolution-in-seconds-amongst-a-list-of-time-series-and-aggregate-all-of-them-to-the-same-temporal-resolution" class="anchor" href="#find-coarser-temporal-resolution-in-seconds-amongst-a-list-of-time-series-and-aggregate-all-of-them-to-the-same-temporal-resolution"><span class="octicon octicon-link"></span></a>Find coarser temporal resolution (in seconds!) amongst a list of time series and aggregate all of them to the same temporal resolution</h1>
 
 <div class="highlight highlight-R"><pre>myList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1NoNeg<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2Reg<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3Reg<span class="p">,</span> 
                <span class="s">"Q"</span> <span class="o">=</span> QReg<span class="p">,</span> <span class="s">"TW"</span> <span class="o">=</span> TW<span class="p">,</span> <span class="s">"TD"</span> <span class="o">=</span> TD<span class="p">,</span> <span class="s">"NR"</span> <span class="o">=</span> NR<span class="p">,</span> <span class="s">"WS"</span> <span class="o">=</span> WS<span class="p">)</span>
 x <span class="o">&lt;-</span> CommonTemporalResolution<span class="p">(</span>myList<span class="p">)</span>
+
+<span class="c1"># use "mean" for rates, "sum" for volumes</span>
+P1 <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>P1<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>P1<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
+P2 <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>P2<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>P2<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
+P3 <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>P3<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>P3<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
+TW <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>TW<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>TW<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
+TD <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>TD<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>TD<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
+NR <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>NR<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>NR<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
+WS <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>WS<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>WS<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
+Q  <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>Q<span class="p">,</span>  endpoints<span class="p">(</span>myList<span class="o">$</span>Q<span class="p">,</span>  <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
 </pre></div>
 
 <p>Derive new variables, e.g. potential evapotranspiration from weather variables</p>
 
-<div class="highlight highlight-R"><pre>E <span class="o">&lt;-</span> pet<span class="p">(</span>stationElevation<span class="o">=</span><span class="m">0</span><span class="p">,</span>x<span class="o">$</span>aggregatedList<span class="o">$</span>TD<span class="p">,</span>x<span class="o">$</span>aggregatedList<span class="o">$</span>TW<span class="p">,</span>
-                            x<span class="o">$</span>aggregatedList<span class="o">$</span>NR<span class="p">,</span>x<span class="o">$</span>aggregatedList<span class="o">$</span>WS<span class="p">)</span>
+<div class="highlight highlight-R"><pre>E <span class="o">&lt;-</span> pet<span class="p">(</span>stationElevation<span class="o">=</span><span class="m">0</span><span class="p">,</span>TD<span class="p">,</span>TW<span class="p">,</span>NR<span class="p">,</span>WS<span class="p">)</span>
 </pre></div>
 
 <p>Select periods with simultaneous recordings</p>
 
-<div class="highlight highlight-R"><pre>tsList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> x<span class="o">$</span>aggregatedList<span class="o">$</span>P1<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> x<span class="o">$</span>aggregatedList<span class="o">$</span>P2<span class="p">,</span> 
-               <span class="s">"P3"</span> <span class="o">=</span> x<span class="o">$</span>aggregatedList<span class="o">$</span>P3<span class="p">,</span> <span class="s">"E"</span> <span class="o">=</span> E<span class="p">,</span> <span class="s">"Q"</span> <span class="o">=</span> x<span class="o">$</span>aggregatedList<span class="o">$</span>Q<span class="p">)</span>
+<div class="highlight highlight-R"><pre>tsList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3<span class="p">,</span> <span class="s">"E"</span> <span class="o">=</span> E<span class="p">,</span> <span class="s">"Q"</span> <span class="o">=</span> Q<span class="p">)</span>
 newList <span class="o">&lt;-</span> ExtractOverlappingPeriod<span class="p">(</span>tsList<span class="p">)</span>
 
 <span class="c1"># test</span>
