@@ -1,5 +1,4 @@
-#' This function trims P, E and Q time series to the overlapping period.
-#' It is possible to ignore Q by setting ignoreQ=TRUE
+#' Trim all the time series contained in a list to the common period.
 #'
 #' @param tsList list of time series (e.g. zoo objects)
 #'
@@ -8,10 +7,10 @@
 #' @author Claudia Vitolo
 #'
 #' @examples
-#' # ExtractOverlappingPeriod(tsList)
+#' # CommonRecordingTime(tsList)
 #'
 
-ExtractOverlappingPeriod <- function(tsList){
+CommonRecordingTime <- function(tsList){
 
   maxIndex <- c()
   minIndex <- c()
@@ -38,10 +37,12 @@ ExtractOverlappingPeriod <- function(tsList){
 
   }
 
-  x <- do.call(merge,newList)
+  names(newList) <- names(tsList)
 
-  names(x) <- names(tsList)
+  #x <- do.call(merge,newList)
 
-  return(x)
+  #names(x) <- names(tsList)
+
+  return(newList)
 
 }
