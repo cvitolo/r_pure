@@ -99,10 +99,6 @@ Change any unrealistic values to NA (e.g. negative P and Q) using the function `
 
 ```R
 P1NoNeg <- CorrectNeg( P1Reg )
-
-# test the effect of CorrectNeg()
-plot(P1Reg)
-lines(P1NoNeg,col="red")
 ```
 
 # Common temporal resolution
@@ -128,14 +124,22 @@ Derive new variables, e.g. potential evapotranspiration from weather variables
 E <- pet(stationElevation=0,TD,TW,NR,WS)
 ```
 
+Align time stamps
+```R
+# format time index consistently
+P1a <- align.time(P1, x)
+P2a <- align.time(P2, x)
+P3a <- align.time(P3, x)
+Ea <- align.time(E, x)
+Qa <- align.time(Q, x)
+
+```
+
 Select periods with simultaneous recordings
 ```R
-tsList <- list("P1" = P1, "P2" = P2, "P3" = P3, "E" = E, "Q" = Q)
-newList <- ExtractOverlappingPeriod(tsList)
-
-# test
-newList[73:77,1]
-window(P1Reg, start=index(newList[72,1]), end=index(newList[77,1]))
+# Select periods with simultaneous recordings
+newList <- CommonRecordingTime(list("P1" = P1a, "P2" = P2a, "P3" = P3a, 
+                                    "E" = Ea, "Q" = Qa) )
 ```
 
 Aggregate in space, e.g. areal averaging using spatial interpolation methods
@@ -151,20 +155,20 @@ Check if there are gaps in the records and infill
 ```R
 any(is.na(P)) # FALSE
 
-any(is.na(newList$E)) # This returns TRUE, therefore we will infill the missing values
+any(is.na(newList$E)) # This returns TRUE, infill the missing values
 Enomissing <- na.approx(newList$E)
 
-any(is.na(newList$Q)) # This returns TRUE, therefore we will infill the missing values
+any(is.na(newList$Q)) # This returns TRUE, infill the missing values
 Qnomissing <- na.approx(newList$Q)
 ```
 
 If necessary, convert units to mm/day:
 ```R
-P <- P*24 # from mm/h to mm/day
+# P is already in mm/day
 E <- Enomissing*24 # from mm/h to mm/day
 
 Area <- 10.55 # Km2
-Q <- Qnomissing*86.4/Area
+Q <- Qnomissing*0.086.4/Area # from l/s to mm/day
 ```
 
 Merge P, E and Q in 1 time series object

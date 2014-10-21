@@ -7,7 +7,8 @@ x <- c("zoo", "chron", "xts", "manipulate", "rgdal", "tgp", "rgdal",
 lapply(x, require, character.only=T); rm(x)
 source('~/Dropbox/Repos/github/r_pure/tests/LoadPureData.R')
 
-# set the path to the input files folder (NOTE: do not use ~ for home folder, rgdal does not like it!)
+# set the path to the input files folder (NOTE: do not use ~ for home folder,
+# rgdal does not like it!)
 datafolder <- "/home/claudia/Dropbox/Projects/PURE/PURE_shared/Data/"
 
 # Extract data for Pontbren, subcatchment 9
@@ -31,7 +32,9 @@ ScanTS( DataList$E, returnNegInfo = FALSE )
 ScanTS( DataList$Q )
 
 ##### Correct, aggregate and prepare for modelling with FUSE
-# Often time series are recorded at non-regular time steps. You can shift your records to align them with a regular grid using the function `Irr2Reg()`.
+# Often time series are recorded at non-regular time steps.
+# You can shift your records to align them with a regular grid using the
+# function `Irr2Reg()`.
 
 # From irregular to regular frequency time step:
 P2Reg <- Irr2Reg( DataList$P$P2 )
@@ -43,52 +46,64 @@ QReg  <- Irr2Reg( DataList$Q )
 plot(DataList$P$P2[1:100])
 lines(P2Reg[1:100],col="red")
 
-# Pontbren does not have any unrealistic values. If there were some, they could be changed to NA using the function `CorrectNeg()`.
+# Pontbren does not have any unrealistic values.
+# If there were some, they could have been changed to NA
+# using the function `CorrectNeg()`.
 
 # Find coarser temporal resolution (in seconds!) amongst a list of time series
-myList <- list("P2" = P2Reg, "P3" = P3Reg, "P5" = P5Reg,
-               "Q" = QReg, "E" = DataList$E)
-x <- CommonTemporalResolution(myList)
+x <- CommonTemporalResolution(list("P2" = P2Reg,
+                                   "P3" = P3Reg,
+                                   "P5" = P5Reg,
+                                   "E"  = DataList$E,
+                                   "Q"  = QReg)      )
 
-# and aggregate all of them to the same temporal resolution
-P2 <- period.apply(myList$P2, endpoints(myList$P2, "seconds", x), mean)
-P3 <- period.apply(myList$P3, endpoints(myList$P3, "seconds", x), mean)
-P5 <- period.apply(myList$P5, endpoints(myList$P5, "seconds", x), mean)
-E  <- period.apply(myList$E,  endpoints(myList$E, "seconds",  x), mean)
-Q  <- period.apply(myList$Q,  endpoints(myList$Q, "seconds",  x), mean)
+# and aggregate all of them to the same temporal resolution: 1 hour
+# P and E should be aggregated with FUN = mean for rates (FUN = sum for volumes)
+# Q should always be aggregated with FUN = mean
+P2a <- period.apply(P2Reg,      endpoints(P2Reg,      "seconds", x), FUN = mean)
+P3a <- period.apply(P3Reg,      endpoints(P3Reg,      "seconds", x), FUN = mean)
+P5a <- period.apply(P5Reg,      endpoints(P5Reg,      "seconds", x), FUN = mean)
+Ea  <- period.apply(DataList$E, endpoints(DataList$E, "seconds", x), FUN = mean)
+Qa  <- period.apply(QReg,       endpoints(QReg,       "seconds", x), FUN = mean)
 
-# There are no new variables to derive, e.g. potential evapotranspiration from weather variables (in case, use the function pet())
+# format time index consistently
+P2a_align <- align.time(P2a, x)
+P3a_align <- align.time(P3a, x)
+P5a_align <- align.time(P5a, x)
+Ea_align  <- align.time(xts(Ea),  x)
+Qa_align  <- align.time(Qa,  x)
+
+# test the effect of the aggregation
+plot(P2Reg[1:100])
+lines(P2a_align[1:100], col="red")
+
+# There are no new variables to derive, e.g. potential evapotranspiration
+# from weather variables (in case, use the function pet())
 
 # Select periods with simultaneous recordings
-tsList <- list("P2" = P2,
-               "P3" = P3,
-               "P5" = P5,
-               "E"  = E,
-               "Q"  = Q)
-newList <- ExtractOverlappingPeriod(tsList)
+newList <- CommonRecordingTime(list("P2" = P2a_align,
+                                    "P3" = P3a_align,
+                                    "P5" = P5a_align,
+                                    "E"  = Ea_align,
+                                    "Q"  = Qa_align) )
 
 # Aggregate in space, e.g. areal averaging using spatial interpolation methods
-tsList <- data.frame(index(newList),"P2"=newList$P2,
+tsList <- data.frame(index(newList$P2),"P2"=newList$P2,
                      "P3"=newList$P3,"P5"=newList$P5)
-P <- ArealAveraging(tsList,areas=DataList$A,interpolationMethod ="Thiessen")
+P <- ArealAveraging(tsList,  areas=DataList$A, interpolationMethod ="Thiessen")
 
 # Check if there are gaps in the records and infill
-any(is.na(P)) # FALSE
-
+any(is.na(P))         # FALSE
 any(is.na(newList$E)) # FALSE
-
-any(is.na(newList$Q)) # This returns TRUE, therefore we will infill the missing values
-Qnomissing <- na.approx(newList$Q)
+any(is.na(newList$Q)) # FALSE
 
 # If necessary, convert units to mm/day:
-P <- P*24             # from mm/h to mm/day
-E <- newList$E*24     # from mm/h to mm/day
-
-Area <- DataList$Area # Km2
-Q <- Qnomissing*86.4/Area
+# P was already recorded in mm/d, no need for convertion
+E <- newList$E*24          # from mm/h to mm/day
+Q <- newList$Q*0.0864/DataList$Area # from l/s to mm/day (area is in Km2)
 
 # Merge P, E and Q in 1 time series object
-DATA <- merge(P,E,Q)
+DATA <- merge(P,E,Q); names(DATA) <- c("P","E","Q")
 
 ### Rainfall-Runoff modelling using FUSE
 # As an example, we could combine 50 parameter sets and 4 model structures to generate 200 model simulations.
