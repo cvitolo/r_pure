@@ -104,6 +104,7 @@ Q <- newList$Q*0.0864/DataList$Area # from l/s to mm/day (area is in Km2)
 
 # Merge P, E and Q in 1 time series object
 DATA <- merge(P,E,Q); names(DATA) <- c("P","E","Q")
+plot(DATA)
 
 ### Rainfall-Runoff modelling using FUSE
 # As an example, we could combine 50 parameter sets and 4 model structures to generate 200 model simulations.
@@ -160,67 +161,94 @@ PlotEnsembles(results$BoundsIE$bounds, results$BoundsRE$discharges,
               label1="IE min-max", label2="RE percentiles")
 
 PlotModelSimilarities(ModelList,results$RETable)
+#PlotParameterSimilarities(results$RETable, parameters)
 
 save(DATA,parameters,MPIs,ModelList,warmup, results, file="~/testPontbren.rda")
 
-################
-# Curve Number #
-################
+###########################################
+# Frequency Analysis of  TIME SERIES DATA #
+###########################################
+load("~/testPontbren.rda")
+library(pure)
 library(hydromad)
 
-### Frequency Analysis of  TIME SERIES DATA
 # return statistics to identify threshold
+plot(DATA)
 summary(DATA$P)
 summary(DATA$Q)
 
+x <- DATA[1:100,c("P","Q")]
+
 # 1. Identify discrete events from time series using hydromad::eventseq.
 #   This function returns a zoo object, with core data consisting of an ordered factor, representing the identified events, and the same time index as x. Periods between events are left as NA, unless all = TRUE in which case they are treated as separate events. The returned object stores thresh as an attribute.
-evp <- eventseq(DATA$P, thresh = 50, inthresh = 1, indur = 4, continue = TRUE)
+evp <- eventseq(x$P,          # precipitation time series
+                thresh = 0.1,    # threshold value
+                inthresh = 0,    # second threshold to define when events stop
+                indur = 6)       # the series must remain below inthresh for
+                                 # this many time steps in order to terminate
+                                 # an event
 str(evp)
-evq <- eventseq(DATA$Q, thresh = 6, indur = 4, mingap = 5)
+
+evq <- eventseq(x$Q, thresh = 2.8, inthres=2.8, indur = 0,
+                mingap = 5)      # the minimum number of time steps that can
+                                 # separate events.
 str(evq)
 
-xyplot(DATA) +
+xyplot(x) +
   layer_(panel.xblocks(evp, col = c("grey90", "grey80"), border = "grey80")) +
   layer(panel.xblocks(evq, block.y = 0, vjust = 1, col = 1))
 
-# 2. Order the data, i.e., sort the individual rainfall and runoff depths independently in descending order to match rainfall and runoff return periods
-eventsP <- sort(eventinfo(DATA$P, evp)$Value, decreasing = TRUE)
+# 2. Order rainfall and runoff in descending order to match rain-runoff
+# return period
+eventsP <- sort(eventinfo(x$P, evp, FUN = max)$Value, decreasing = TRUE)
 returnPeriodP <- (length(eventsP)-1)/(1:length(eventsP))
 # exceedenceProbability <- 1/returnPeriod
 dP <- data.frame(x=returnPeriodP, y=eventsP)
 loglogplot(dP)
 
-eventsQ <- sort(eventinfo(DATA$Q, evq)$Value, decreasing = TRUE)
+eventsQ <- sort(eventinfo(x$Q, evq, FUN = max)$Value, decreasing = TRUE)
 returnPeriodQ <- (length(eventsQ)-1)/(1:length(eventsQ))
 # exceedenceProbability <- 1/returnPeriod
 dQ <- data.frame(x=returnPeriodQ, y=eventsQ)
 loglogplot(dQ)
 
-
-
-model.lm <- lm(formula = y ~ x + I(x^2) + I(x^3) + I(x^4), data = dP)
+# Calculate the regression function that describes dP
+# modelP.lm <- lm(formula = y ~ x + I(x^2), data = dP)
+modelP.lm <- lm(formula = y ~ log(x), data = dP)
+# Calculate the regression function that describes dQ
+# modelQ.lm <- lm(formula = y ~ x + I(x^2), data = dQ)
+modelQ.lm <- lm(formula = y ~ log(x), data = dQ)
+# Define some return periods
+Tr <- 1:75
 # Use predict to estimate the values for the return period.
 # Note that predict expects a data.frame and the col names need to match
-newY <- predict(model.lm, newdata = data.frame(x = dQ$x))
+newP <- predict(modelP.lm, newdata = data.frame(x = Tr))
+newQ <- predict(modelQ.lm, newdata = data.frame(x = Tr))
 
-plot(dP$x, dP$y, type="o")
-points(dQ$x, newY, col = "red")
+plot(dP$x, dP$y, type="o", ylim=c(min(dP$y,newP),max(dP$y,newP)))
+points(Tr, newP, col = "red")
+
+plot(dQ$x, dQ$y, type="o", ylim=c(min(dQ$y,newQ),max(dQ$y,newQ)))
+points(Tr, newQ, col = "red")
 
 # Final data.frame
-df <- data.frame(Tr=dQ$x,P=newY,Q=dQ$y)
+df <- data.frame("Tr"=Tr,"P"=newP,"Q"=newQ)
 
+################
+# Curve Number #
+################
 # 3. Determine the CN for each event
 # where P & Q are in inches and area is in acre
 Q <- df$Q/25.4
 P <- df$P/25.5
-area <- DataList$Area*247.105
+area <- 4.8*247.105 # area <- DataList$Area*247.105
 
-source('~/Dropbox/Repos/github/r_uncertflood/UncertFlood/R/calculateCN.R')
 CN <- calculateCN(P,Q)
 df$CN <- CN
 
 result <- nls(log(CN)~log(a + (100 - a) * exp(-b*P)),start=list(a=1,b=1),data=df)
+
+result <- nls(CN ~ (a + (100 - a) * exp(-b*P)),start=list(a=1,b=1),data=df)
 summary(result)
 
 a <- summary(result)$coefficients["a","Estimate"] # CN*USDA
