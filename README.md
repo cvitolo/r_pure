@@ -257,8 +257,7 @@ df <- EventIdentification(DATA)
 ```
 
 ### Curve Number
-# Determine the CN for each event
-# where P & Q are in inches and area is in acre
+Determine the CN for each event where P & Q are in inches and area is in acre
 ```R
 Q <- df$Q/25.4       # in inches
 P <- df$P/25.5       # in inches
