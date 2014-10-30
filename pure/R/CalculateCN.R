@@ -8,7 +8,7 @@
 #' @return Curve Number, in the range [0,100]
 #'
 
-calculateCN <- function(P,Q){
+CalculateCN <- function(P,Q){
 
   if (length(P)!=length(Q)) stop
 

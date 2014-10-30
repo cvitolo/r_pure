@@ -173,121 +173,24 @@ library(pure)
 library(hydromad)
 
 # return statistics to identify threshold
+source('~/Dropbox/Repos/github/r_pure/pure/R/EventIdentification.R')
 plot(DATA)
 summary(DATA$P)
 summary(DATA$Q)
 
-x <- DATA[1:100,c("P","Q")]
-
-# 1. Identify discrete events from time series using hydromad::eventseq.
-#   This function returns a zoo object, with core data consisting of an ordered factor, representing the identified events, and the same time index as x. Periods between events are left as NA, unless all = TRUE in which case they are treated as separate events. The returned object stores thresh as an attribute.
-evp <- eventseq(x$P,          # precipitation time series
-                thresh = 0.1,    # threshold value
-                inthresh = 0,    # second threshold to define when events stop
-                indur = 6)       # the series must remain below inthresh for
-                                 # this many time steps in order to terminate
-                                 # an event
-str(evp)
-
-evq <- eventseq(x$Q, thresh = 2.8, inthres=2.8, indur = 0,
-                mingap = 5)      # the minimum number of time steps that can
-                                 # separate events.
-str(evq)
-
-xyplot(x) +
-  layer_(panel.xblocks(evp, col = c("grey90", "grey80"), border = "grey80")) +
-  layer(panel.xblocks(evq, block.y = 0, vjust = 1, col = 1))
-
-# 2. Order rainfall and runoff in descending order to match rain-runoff
-# return period
-eventsP <- sort(eventinfo(x$P, evp, FUN = max)$Value, decreasing = TRUE)
-returnPeriodP <- (length(eventsP)-1)/(1:length(eventsP))
-# exceedenceProbability <- 1/returnPeriod
-dP <- data.frame(x=returnPeriodP, y=eventsP)
-loglogplot(dP)
-
-eventsQ <- sort(eventinfo(x$Q, evq, FUN = max)$Value, decreasing = TRUE)
-returnPeriodQ <- (length(eventsQ)-1)/(1:length(eventsQ))
-# exceedenceProbability <- 1/returnPeriod
-dQ <- data.frame(x=returnPeriodQ, y=eventsQ)
-loglogplot(dQ)
-
-# Calculate the regression function that describes dP
-# modelP.lm <- lm(formula = y ~ x + I(x^2), data = dP)
-modelP.lm <- lm(formula = y ~ log(x), data = dP)
-# Calculate the regression function that describes dQ
-# modelQ.lm <- lm(formula = y ~ x + I(x^2), data = dQ)
-modelQ.lm <- lm(formula = y ~ log(x), data = dQ)
-# Define some return periods
-Tr <- 1:75
-# Use predict to estimate the values for the return period.
-# Note that predict expects a data.frame and the col names need to match
-newP <- predict(modelP.lm, newdata = data.frame(x = Tr))
-newQ <- predict(modelQ.lm, newdata = data.frame(x = Tr))
-
-plot(dP$x, dP$y, type="o", ylim=c(min(dP$y,newP),max(dP$y,newP)))
-points(Tr, newP, col = "red")
-
-plot(dQ$x, dQ$y, type="o", ylim=c(min(dQ$y,newQ),max(dQ$y,newQ)))
-points(Tr, newQ, col = "red")
-
-# Final data.frame
-df <- data.frame("Tr"=Tr,"P"=newP,"Q"=newQ)
+df <- EventIdentification(DATA)
 
 ################
 # Curve Number #
 ################
+source('~/Dropbox/Repos/github/r_pure/pure/R/calculateCN.R')
+
 # 3. Determine the CN for each event
 # where P & Q are in inches and area is in acre
 Q <- df$Q/25.4
 P <- df$P/25.5
 area <- 4.8*247.105 # area <- DataList$Area*247.105
 
-CN <- calculateCN(P,Q)
-df$CN <- CN
+CN <- calculateCN(P,Q); df$CN <- CN
+myCN <- median( sort(CN, decreasing = TRUE)[1:5] )
 
-result <- nls(log(CN)~log(a + (100 - a) * exp(-b*P)),start=list(a=1,b=1),data=df)
-
-result <- nls(CN ~ (a + (100 - a) * exp(-b*P)),start=list(a=1,b=1),data=df)
-summary(result)
-
-a <- summary(result)$coefficients["a","Estimate"] # CN*USDA
-b <- summary(result)$coefficients["b","Estimate"] # k
-
-### SPATIAL DATA
-
-catchment <- DataList$catchment
-DTM <- DataList$DTM
-Soil <- DataList$Soil
-LandUse <- DataList$LandUse
-
-plot(Soil)
-plot(catchment,col=rgb(1,0,0,0.2),add=TRUE)
-
-# Mapping HOST to USDA classes
-t <- data.frame(table(raster::extract(Soil,catchment)))
-t <- cbind(t,"USDAclass"=rep(NA, dim(t)[1]))
-for (r in 1: dim(t)[1]) {
-  if (any(c(1,2,3,5,11,13)==t[r,1])) t[r,3] <- "A"
-  if (any(c(4,7)==t[r,1])) t[r,3] <- "AB"
-  if (any(c(6,8,9,10,16)==t[r,1])) t[r,3] <- "B"
-  if (17==t[r,1]) t[r,3] <- "BC"
-  if (any(c(18,19,20)==t[r,1])) t[r,3] <- "C"
-  if (any(c(14,15,28)==t[r,1])) t[r,3] <- "CD"
-  if (any(c(12,21,22,23,24,25,26,27,29)==t[r,1])) t[r,3] <- "D"
-}
-
-USDAclass <- unique(t[,3])
-taggregated <- data.frame(USDAclass,"Ncells"=rep(NA,length(USDAclass)))
-for (r in 1:length(USDAclass)) {
-  taggregated[r,2] <- sum(t[which(t[,3]==taggregated[r,1]),2])
-}
-
-plot(LandUse)
-plot(catchment,col=rgb(1,0,0,0.2),add=TRUE)
-
-# Mapping Land Cover Map to USDA classes
-t2 <- data.frame(table(extract(LandUse,catchment)))
-
-##### GLUE UNCERTAINTY ANALYSIS
-glue()

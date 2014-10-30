@@ -101,7 +101,7 @@ Change any unrealistic values to NA (e.g. negative P and Q) using the function `
 P1NoNeg <- CorrectNeg( P1Reg )
 ```
 
-# Common temporal resolution
+##### Common temporal resolution
 Find coarser temporal resolution (in seconds!) amongst a list of time series and aggregate all of them to the same temporal resolution
 ```R
 myList <- list("P1" = P1NoNeg, "P2" = P2Reg, "P3" = P3Reg, 
@@ -239,6 +239,34 @@ results <- amca(DATA,ModelList,warmup,parameters,outputFolder)
 The best configuration is stored in
 ```R
 results$RETable
+```
+
+### Frequency Analysis
+For this task it is necessary to install another packages:
+
+```R
+# Install and load packages 
+install.packages("hydromad", repos="http://hydromad.catchment.org")
+install.packages("EcoHydRology")
+library(EcoHydRology)
+```
+
+Identify events Precipitation-discharge events:
+```R
+df <- EventIdentification(DATA)
+```
+
+### Curve Number
+# Determine the CN for each event
+# where P & Q are in inches and area is in acre
+```R
+Q <- df$Q/25.4       # in inches
+P <- df$P/25.5       # in inches
+area <- Area*247.105 # in acre
+
+CN <- calculateCN(P,Q); df$CN <- CN
+myCN <- median( sort(CN, decreasing = TRUE)[1:5] )
+
 ```
 
 # Leave your feedback
