@@ -145,14 +145,10 @@ lines<span class="p">(</span>P1Reg<span class="p">[</span><span class="m">40</sp
 <p>Change any unrealistic values to NA (e.g. negative P and Q) using the function <code>CorrectNeg()</code>. </p>
 
 <div class="highlight highlight-R"><pre>P1NoNeg <span class="o">&lt;-</span> CorrectNeg<span class="p">(</span> P1Reg <span class="p">)</span>
-
-<span class="c1"># test the effect of CorrectNeg()</span>
-plot<span class="p">(</span>P1Reg<span class="p">)</span>
-lines<span class="p">(</span>P1NoNeg<span class="p">,</span>col<span class="o">=</span><span class="s">"red"</span><span class="p">)</span>
 </pre></div>
 
-<h1>
-<a name="common-temporal-resolution" class="anchor" href="#common-temporal-resolution"><span class="octicon octicon-link"></span></a>Common temporal resolution</h1>
+<h5>
+<a name="common-temporal-resolution" class="anchor" href="#common-temporal-resolution"><span class="octicon octicon-link"></span></a>Common temporal resolution</h5>
 
 <p>Find coarser temporal resolution (in seconds!) amongst a list of time series and aggregate all of them to the same temporal resolution</p>
 
@@ -176,14 +172,22 @@ Q  <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span 
 <div class="highlight highlight-R"><pre>E <span class="o">&lt;-</span> pet<span class="p">(</span>stationElevation<span class="o">=</span><span class="m">0</span><span class="p">,</span>TD<span class="p">,</span>TW<span class="p">,</span>NR<span class="p">,</span>WS<span class="p">)</span>
 </pre></div>
 
+<p>Align time stamps</p>
+
+<div class="highlight highlight-R"><pre><span class="c1"># format time index consistently</span>
+P1a <span class="o">&lt;-</span> align.time<span class="p">(</span>P1<span class="p">,</span> x<span class="p">)</span>
+P2a <span class="o">&lt;-</span> align.time<span class="p">(</span>P2<span class="p">,</span> x<span class="p">)</span>
+P3a <span class="o">&lt;-</span> align.time<span class="p">(</span>P3<span class="p">,</span> x<span class="p">)</span>
+Ea <span class="o">&lt;-</span> align.time<span class="p">(</span>E<span class="p">,</span> x<span class="p">)</span>
+Qa <span class="o">&lt;-</span> align.time<span class="p">(</span>Q<span class="p">,</span> x<span class="p">)</span>
+
+</pre></div>
+
 <p>Select periods with simultaneous recordings</p>
 
-<div class="highlight highlight-R"><pre>tsList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3<span class="p">,</span> <span class="s">"E"</span> <span class="o">=</span> E<span class="p">,</span> <span class="s">"Q"</span> <span class="o">=</span> Q<span class="p">)</span>
-newList <span class="o">&lt;-</span> ExtractOverlappingPeriod<span class="p">(</span>tsList<span class="p">)</span>
-
-<span class="c1"># test</span>
-newList<span class="p">[</span><span class="m">73</span><span class="o">:</span><span class="m">77</span><span class="p">,</span><span class="m">1</span><span class="p">]</span>
-window<span class="p">(</span>P1Reg<span class="p">,</span> start<span class="o">=</span>index<span class="p">(</span>newList<span class="p">[</span><span class="m">72</span><span class="p">,</span><span class="m">1</span><span class="p">]),</span> end<span class="o">=</span>index<span class="p">(</span>newList<span class="p">[</span><span class="m">77</span><span class="p">,</span><span class="m">1</span><span class="p">]))</span>
+<div class="highlight highlight-R"><pre><span class="c1"># Select periods with simultaneous recordings</span>
+newList <span class="o">&lt;-</span> CommonRecordingTime<span class="p">(</span><span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1a<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2a<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3a<span class="p">,</span> 
+                                    <span class="s">"E"</span> <span class="o">=</span> Ea<span class="p">,</span> <span class="s">"Q"</span> <span class="o">=</span> Qa<span class="p">)</span> <span class="p">)</span>
 </pre></div>
 
 <p>Aggregate in space, e.g. areal averaging using spatial interpolation methods</p>
@@ -199,20 +203,20 @@ P <span class="o">&lt;-</span> ArealAveraging<span class="p">(</span>tsList<span
 
 <div class="highlight highlight-R"><pre><span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>P<span class="p">))</span> <span class="c1"># FALSE</span>
 
-<span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>newList<span class="o">$</span>E<span class="p">))</span> <span class="c1"># This returns TRUE, therefore we will infill the missing values</span>
+<span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>newList<span class="o">$</span>E<span class="p">))</span> <span class="c1"># This returns TRUE, infill the missing values</span>
 Enomissing <span class="o">&lt;-</span> na.approx<span class="p">(</span>newList<span class="o">$</span>E<span class="p">)</span>
 
-<span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>newList<span class="o">$</span>Q<span class="p">))</span> <span class="c1"># This returns TRUE, therefore we will infill the missing values</span>
+<span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>newList<span class="o">$</span>Q<span class="p">))</span> <span class="c1"># This returns TRUE, infill the missing values</span>
 Qnomissing <span class="o">&lt;-</span> na.approx<span class="p">(</span>newList<span class="o">$</span>Q<span class="p">)</span>
 </pre></div>
 
 <p>If necessary, convert units to mm/day:</p>
 
-<div class="highlight highlight-R"><pre>P <span class="o">&lt;-</span> P<span class="o">*</span><span class="m">24</span> <span class="c1"># from mm/h to mm/day</span>
+<div class="highlight highlight-R"><pre><span class="c1"># P is already in mm/day</span>
 E <span class="o">&lt;-</span> Enomissing<span class="o">*</span><span class="m">24</span> <span class="c1"># from mm/h to mm/day</span>
 
 Area <span class="o">&lt;-</span> <span class="m">10.55</span> <span class="c1"># Km2</span>
-Q <span class="o">&lt;-</span> Qnomissing<span class="o">*</span><span class="m">86.4</span><span class="o">/</span>Area
+Q <span class="o">&lt;-</span> Qnomissing<span class="o">*</span><span class="m">0.086.4</span><span class="o">/</span>Area <span class="c1"># from l/s to mm/day</span>
 </pre></div>
 
 <p>Merge P, E and Q in 1 time series object</p>
@@ -286,6 +290,40 @@ install_github<span class="p">(</span><span class="s">"r_amca"</span><span class
 <p>The best configuration is stored in</p>
 
 <div class="highlight highlight-R"><pre>results<span class="o">$</span>RETable
+</pre></div>
+
+<h3>
+<a name="frequency-analysis" class="anchor" href="#frequency-analysis"><span class="octicon octicon-link"></span></a>Frequency Analysis</h3>
+
+<p>For this task it is necessary to install another packages:</p>
+
+<div class="highlight highlight-R"><pre><span class="c1"># Install and load packages </span>
+install.packages<span class="p">(</span><span class="s">"hydromad"</span><span class="p">,</span> repos<span class="o">=</span><span class="s">"http://hydromad.catchment.org"</span><span class="p">)</span>
+install.packages<span class="p">(</span><span class="s">"EcoHydRology"</span><span class="p">)</span>
+<span class="kn">library</span><span class="p">(</span>EcoHydRology<span class="p">)</span>
+</pre></div>
+
+<p>Identify events Precipitation-discharge events:</p>
+
+<div class="highlight highlight-R"><pre>df <span class="o">&lt;-</span> EventIdentification<span class="p">(</span>DATA<span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="curve-number" class="anchor" href="#curve-number"><span class="octicon octicon-link"></span></a>Curve Number</h3>
+
+<h1>
+<a name="determine-the-cn-for-each-event" class="anchor" href="#determine-the-cn-for-each-event"><span class="octicon octicon-link"></span></a>Determine the CN for each event</h1>
+
+<h1>
+<a name="where-p--q-are-in-inches-and-area-is-in-acre" class="anchor" href="#where-p--q-are-in-inches-and-area-is-in-acre"><span class="octicon octicon-link"></span></a>where P &amp; Q are in inches and area is in acre</h1>
+
+<div class="highlight highlight-R"><pre>Q <span class="o">&lt;-</span> df<span class="o">$</span>Q<span class="o">/</span><span class="m">25.4</span>       <span class="c1"># in inches</span>
+P <span class="o">&lt;-</span> df<span class="o">$</span>P<span class="o">/</span><span class="m">25.5</span>       <span class="c1"># in inches</span>
+area <span class="o">&lt;-</span> Area<span class="o">*</span><span class="m">247.105</span> <span class="c1"># in acre</span>
+
+CN <span class="o">&lt;-</span> calculateCN<span class="p">(</span>P<span class="p">,</span>Q<span class="p">);</span> df<span class="o">$</span>CN <span class="o">&lt;-</span> CN
+myCN <span class="o">&lt;-</span> median<span class="p">(</span> <span class="kp">sort</span><span class="p">(</span>CN<span class="p">,</span> decreasing <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)[</span><span class="m">1</span><span class="o">:</span><span class="m">5</span><span class="p">]</span> <span class="p">)</span>
+
 </pre></div>
 
 <h1>
