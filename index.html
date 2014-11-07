@@ -32,7 +32,7 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <h1>
-<a name="pure-r-package" class="anchor" href="#pure-r-package"><span class="octicon octicon-link"></span></a>PURE (R package)</h1>
+<a id="pure-r-package" class="anchor" href="#pure-r-package" aria-hidden="true"><span class="octicon octicon-link"></span></a>PURE (R package)</h1>
 
 <p>Workflow for flood frequency analysis under uncertainty (work in progress!).</p>
 
@@ -45,30 +45,26 @@ sudo apt-get install libudunits2-dev
 install.packages("hydroTSM")</p>
 
 <h4>
-<a name="basics" class="anchor" href="#basics"><span class="octicon octicon-link"></span></a>Basics</h4>
+<a id="basics" class="anchor" href="#basics" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basics</h4>
 
 <p>Install and load packages</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># Install dependent packages from CRAN:</span>
-x <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"zoo"</span><span class="p">,</span> <span class="s">"chron"</span><span class="p">,</span> <span class="s">"xts"</span><span class="p">,</span> <span class="s">"manipulate"</span><span class="p">,</span> <span class="s">"rgdal"</span><span class="p">,</span> <span class="s">"tgp"</span><span class="p">,</span>
-       <span class="s">"sp"</span><span class="p">,</span> <span class="s">"gstat"</span><span class="p">,</span> <span class="s">"grid"</span><span class="p">,</span> <span class="s">"hydroTSM"</span><span class="p">,</span> <span class="s">"Hmisc"</span><span class="p">,</span> <span class="s">"raster"</span><span class="p">,</span> <span class="s">"reshape2"</span><span class="p">,</span> 
-       <span class="s">"ggplot2"</span><span class="p">,</span> <span class="s">"qualV"</span><span class="p">,</span> <span class="s">"lhs"</span><span class="p">,</span> <span class="s">"MASS"</span><span class="p">)</span>
-install.packages<span class="p">(</span>x<span class="p">)</span>
-<span class="kp">lapply</span><span class="p">(</span>x<span class="p">,</span> <span class="kn">require</span><span class="p">,</span> character.only<span class="o">=</span><span class="bp">T</span><span class="p">);</span> <span class="kp">rm</span><span class="p">(</span>x<span class="p">)</span>
+<span class="nv">x</span> <span class="o">&lt;-</span> c(<span class="s2">"zoo"</span>, <span class="s2">"chron"</span>, <span class="s2">"xts"</span>, <span class="s2">"manipulate"</span>, <span class="s2">"rgdal"</span>, <span class="s2">"tgp"</span>,
+       <span class="s2">"sp"</span>, <span class="s2">"gstat"</span>, <span class="s2">"grid"</span>, <span class="s2">"hydroTSM"</span>, <span class="s2">"Hmisc"</span>, <span class="s2">"raster"</span>, <span class="s2">"reshape2"</span>, 
+       <span class="s2">"ggplot2"</span>, <span class="s2">"qualV"</span>, <span class="s2">"lhs"</span>, <span class="s2">"MASS"</span>)
+install.packages(<span class="nv">x</span>)
+lapply(<span class="nv">x</span>, <span class="nv">require</span>, <span class="nv">character.only</span><span class="o">=</span><span class="kc">T</span>); rm(<span class="nv">x</span>)
 
 <span class="c1"># Install dpendent package from R-Forge:</span>
-install.packages<span class="p">(</span><span class="s">"fuse"</span><span class="p">,</span> repos<span class="o">=</span><span class="s">"http://R-Forge.R-project.org"</span><span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>fuse<span class="p">)</span>
+install.packages(<span class="s2">"fuse"</span>, <span class="nv">repos</span><span class="o">=</span><span class="s2">"http://R-Forge.R-project.org"</span>)
 
 <span class="c1"># Install dependent gists and packages from github:</span>
-<span class="kn">library</span><span class="p">(</span>devtools<span class="p">)</span>
-install_github<span class="p">(</span><span class="s">"r_rnrfa"</span><span class="p">,</span> username <span class="o">=</span> <span class="s">"cvitolo"</span><span class="p">,</span> subdir <span class="o">=</span> <span class="s">"rnrfa"</span><span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>rnrfa<span class="p">)</span>
+library(<span class="nv">devtools</span>)
+install_github(<span class="s2">"cvitolo/r_rnrfa"</span>, <span class="nv">subdir</span> <span class="o">=</span> <span class="s2">"rnrfa"</span>)
 
 <span class="c1"># Install pure package</span>
-install_github<span class="p">(</span><span class="s">"r_pure"</span><span class="p">,</span> username <span class="o">=</span> <span class="s">"cvitolo"</span><span class="p">,</span> subdir <span class="o">=</span> <span class="s">"pure"</span><span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>pure<span class="p">)</span>
-</pre></div>
+install_github(<span class="s2">"cvitolo/r_pure"</span>, <span class="nv">subdir</span> <span class="o">=</span> <span class="s2">"pure"</span>)</pre></div>
 
 <p>Make zoo objects for your time series: </p>
 
@@ -85,16 +81,16 @@ install_github<span class="p">(</span><span class="s">"r_pure"</span><span class
 
 <p>An example is given below:</p>
 
-<div class="highlight highlight-R"><pre><span class="c1"># Load sample time series (this contains 3 objects: P, E and Q)</span>
-data<span class="p">(</span>P1<span class="p">)</span>
-data<span class="p">(</span>P2<span class="p">)</span>
-data<span class="p">(</span>P3<span class="p">)</span>
-data<span class="p">(</span>Q<span class="p">)</span>
-data<span class="p">(</span>weather<span class="p">)</span>
-</pre></div>
+<div class="highlight highlight-R"><pre>library(<span class="nv">pure</span>)
+<span class="c1"># Load sample time series (this contains 3 objects: P, E and Q)</span>
+data(<span class="nv">P1</span>)
+data(<span class="nv">P2</span>)
+data(<span class="nv">P3</span>)
+data(<span class="nv">Q</span>)
+data(<span class="nv">weather</span>)</pre></div>
 
 <h3>
-<a name="pre-processing" class="anchor" href="#pre-processing"><span class="octicon octicon-link"></span></a>Pre-processing</h3>
+<a id="pre-processing" class="anchor" href="#pre-processing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pre-processing</h3>
 
 <p>Below are a series of utility functions for time series pre-processing, divided in 4 categories: </p>
 
@@ -106,224 +102,200 @@ data<span class="p">(</span>weather<span class="p">)</span>
 </ul>
 
 <h5>
-<a name="report" class="anchor" href="#report"><span class="octicon octicon-link"></span></a>Report</h5>
+<a id="report" class="anchor" href="#report" aria-hidden="true"><span class="octicon octicon-link"></span></a>Report</h5>
 
 <p>Report problems with time series using the function <code>ScanTS()</code>.
 As an example you can use the example dataset provided with this package.</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># Report</span>
-ScanTS<span class="p">(</span> P1<span class="p">,</span> verbose <span class="o">=</span> <span class="kc">TRUE</span>  <span class="p">)</span>
-ScanTS<span class="p">(</span> P2<span class="p">,</span> verbose <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
-ScanTS<span class="p">(</span> P3<span class="p">,</span> verbose <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
-ScanTS<span class="p">(</span> Q<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
-ScanTS<span class="p">(</span> weather<span class="o">$</span>TD<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> returnNegInfo <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
-ScanTS<span class="p">(</span> weather<span class="o">$</span>TW<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> returnNegInfo <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
-ScanTS<span class="p">(</span> weather<span class="o">$</span>NR<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> returnNegInfo <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
-ScanTS<span class="p">(</span> weather<span class="o">$</span>WS<span class="p">,</span>  verbose <span class="o">=</span> <span class="kc">FALSE</span> <span class="p">)</span>
-</pre></div>
+ScanTS( <span class="nv">P1</span>, <span class="nv">verbose</span> <span class="o">=</span> <span class="kc">TRUE</span>  )
+ScanTS( <span class="nv">P2</span>, <span class="nv">verbose</span> <span class="o">=</span> <span class="kc">FALSE</span> )
+ScanTS( <span class="nv">P3</span>, <span class="nv">verbose</span> <span class="o">=</span> <span class="kc">FALSE</span> )
+ScanTS( <span class="nv">Q</span>,  <span class="nv">verbose</span> <span class="o">=</span> <span class="kc">FALSE</span> )
+ScanTS( <span class="nv">weather</span><span class="k">$</span><span class="nv">TD</span>,  <span class="nv">verbose</span> <span class="o">=</span> <span class="kc">FALSE</span>, <span class="nv">returnNegInfo</span> <span class="o">=</span> <span class="kc">FALSE</span> )
+ScanTS( <span class="nv">weather</span><span class="k">$</span><span class="nv">TW</span>,  <span class="nv">verbose</span> <span class="o">=</span> <span class="kc">FALSE</span>, <span class="nv">returnNegInfo</span> <span class="o">=</span> <span class="kc">FALSE</span> )
+ScanTS( <span class="nv">weather</span><span class="k">$</span><span class="nv">NR</span>,  <span class="nv">verbose</span> <span class="o">=</span> <span class="kc">FALSE</span>, <span class="nv">returnNegInfo</span> <span class="o">=</span> <span class="kc">FALSE</span> )
+ScanTS( <span class="nv">weather</span><span class="k">$</span><span class="nv">WS</span>,  <span class="nv">verbose</span> <span class="o">=</span> <span class="kc">FALSE</span> )</pre></div>
 
 <h5>
-<a name="correct-aggregate-and-prepare-for-modelling-with-fuse" class="anchor" href="#correct-aggregate-and-prepare-for-modelling-with-fuse"><span class="octicon octicon-link"></span></a>Correct, aggregate and prepare for modelling with FUSE</h5>
+<a id="correct-aggregate-and-prepare-for-modelling-with-fuse" class="anchor" href="#correct-aggregate-and-prepare-for-modelling-with-fuse" aria-hidden="true"><span class="octicon octicon-link"></span></a>Correct, aggregate and prepare for modelling with FUSE</h5>
 
 <p>Often time series are recorded at non-regular time steps. You can shift your records to align them with a regular grid using the function <code>Irr2Reg()</code>.</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># From irregular to regular frequency time step:</span>
-P1Reg <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> P1 <span class="p">)</span>
-P2Reg <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> P2 <span class="p">)</span>
-P3Reg <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> P3 <span class="p">)</span>
-QReg  <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> Q <span class="p">)</span>
-TW    <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> weather<span class="o">$</span>TW <span class="p">)</span>
-TD    <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> weather<span class="o">$</span>TD <span class="p">)</span>
-NR    <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> weather<span class="o">$</span>NR <span class="p">)</span>
-WS    <span class="o">&lt;-</span> Irr2Reg<span class="p">(</span> weather<span class="o">$</span>WS <span class="p">)</span>
+<span class="nv">P1Reg</span> <span class="o">&lt;-</span> Irr2Reg( <span class="nv">P1</span> )
+<span class="nv">P2Reg</span> <span class="o">&lt;-</span> Irr2Reg( <span class="nv">P2</span> )
+<span class="nv">P3Reg</span> <span class="o">&lt;-</span> Irr2Reg( <span class="nv">P3</span> )
+<span class="nv">QReg</span>  <span class="o">&lt;-</span> Irr2Reg( <span class="nv">Q</span> )
+<span class="nv">TW</span>    <span class="o">&lt;-</span> Irr2Reg( <span class="nv">weather</span><span class="k">$</span><span class="nv">TW</span> )
+<span class="nv">TD</span>    <span class="o">&lt;-</span> Irr2Reg( <span class="nv">weather</span><span class="k">$</span><span class="nv">TD</span> )
+<span class="nv">NR</span>    <span class="o">&lt;-</span> Irr2Reg( <span class="nv">weather</span><span class="k">$</span><span class="nv">NR</span> )
+<span class="nv">WS</span>    <span class="o">&lt;-</span> Irr2Reg( <span class="nv">weather</span><span class="k">$</span><span class="nv">WS</span> )
 
 <span class="c1"># test the effect of Irr2Reg()</span>
-plot<span class="p">(</span>P1<span class="p">[</span><span class="m">40</span><span class="o">:</span><span class="m">45</span><span class="p">])</span>
-lines<span class="p">(</span>P1Reg<span class="p">[</span><span class="m">40</span><span class="o">:</span><span class="m">45</span><span class="p">],</span>col<span class="o">=</span><span class="s">"red"</span><span class="p">)</span>
-</pre></div>
+plot(<span class="nv">P1</span>[<span class="m">40</span><span class="k">:</span><span class="m">45</span>])
+lines(<span class="nv">P1Reg</span>[<span class="m">40</span><span class="k">:</span><span class="m">45</span>],<span class="nv">col</span><span class="o">=</span><span class="s2">"red"</span>)</pre></div>
 
 <p>Change any unrealistic values to NA (e.g. negative P and Q) using the function <code>CorrectNeg()</code>. </p>
 
-<div class="highlight highlight-R"><pre>P1NoNeg <span class="o">&lt;-</span> CorrectNeg<span class="p">(</span> P1Reg <span class="p">)</span>
-</pre></div>
+<div class="highlight highlight-R"><pre><span class="nv">P1NoNeg</span> <span class="o">&lt;-</span> CorrectNeg( <span class="nv">P1Reg</span> )</pre></div>
 
 <h5>
-<a name="common-temporal-resolution" class="anchor" href="#common-temporal-resolution"><span class="octicon octicon-link"></span></a>Common temporal resolution</h5>
+<a id="common-temporal-resolution" class="anchor" href="#common-temporal-resolution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Common temporal resolution</h5>
 
 <p>Find coarser temporal resolution (in seconds!) amongst a list of time series and aggregate all of them to the same temporal resolution</p>
 
-<div class="highlight highlight-R"><pre>myList <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1NoNeg<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2Reg<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3Reg<span class="p">,</span> 
-               <span class="s">"Q"</span> <span class="o">=</span> QReg<span class="p">,</span> <span class="s">"TW"</span> <span class="o">=</span> TW<span class="p">,</span> <span class="s">"TD"</span> <span class="o">=</span> TD<span class="p">,</span> <span class="s">"NR"</span> <span class="o">=</span> NR<span class="p">,</span> <span class="s">"WS"</span> <span class="o">=</span> WS<span class="p">)</span>
-x <span class="o">&lt;-</span> CommonTemporalResolution<span class="p">(</span>myList<span class="p">)</span>
+<div class="highlight highlight-R"><pre><span class="nv">myList</span> <span class="o">&lt;-</span> <span class="kt">list</span>(<span class="s2">"P1"</span> <span class="o">=</span> <span class="nv">P1NoNeg</span>, <span class="s2">"P2"</span> <span class="o">=</span> <span class="nv">P2Reg</span>, <span class="s2">"P3"</span> <span class="o">=</span> <span class="nv">P3Reg</span>, 
+               <span class="s2">"Q"</span> <span class="o">=</span> <span class="nv">QReg</span>, <span class="s2">"TW"</span> <span class="o">=</span> <span class="nv">TW</span>, <span class="s2">"TD"</span> <span class="o">=</span> <span class="nv">TD</span>, <span class="s2">"NR"</span> <span class="o">=</span> <span class="nv">NR</span>, <span class="s2">"WS"</span> <span class="o">=</span> <span class="nv">WS</span>)
+<span class="nv">x</span> <span class="o">&lt;-</span> CommonTemporalResolution(<span class="nv">myList</span>)
 
 <span class="c1"># use "mean" for rates, "sum" for volumes</span>
-P1 <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>P1<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>P1<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
-P2 <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>P2<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>P2<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
-P3 <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>P3<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>P3<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
-TW <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>TW<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>TW<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
-TD <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>TD<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>TD<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
-NR <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>NR<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>NR<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
-WS <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>WS<span class="p">,</span> endpoints<span class="p">(</span>myList<span class="o">$</span>WS<span class="p">,</span> <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
-Q  <span class="o">&lt;-</span> period.apply<span class="p">(</span>myList<span class="o">$</span>Q<span class="p">,</span>  endpoints<span class="p">(</span>myList<span class="o">$</span>Q<span class="p">,</span>  <span class="s">"seconds"</span><span class="p">,</span> x<span class="p">),</span> <span class="kp">mean</span><span class="p">)</span>
-</pre></div>
+<span class="nv">P1</span> <span class="o">&lt;-</span> period.apply(<span class="nv">myList</span><span class="k">$</span><span class="nv">P1</span>, endpoints(<span class="nv">myList</span><span class="k">$</span><span class="nv">P1</span>, <span class="s2">"seconds"</span>, <span class="nv">x</span>), <span class="nv">mean</span>)
+<span class="nv">P2</span> <span class="o">&lt;-</span> period.apply(<span class="nv">myList</span><span class="k">$</span><span class="nv">P2</span>, endpoints(<span class="nv">myList</span><span class="k">$</span><span class="nv">P2</span>, <span class="s2">"seconds"</span>, <span class="nv">x</span>), <span class="nv">mean</span>)
+<span class="nv">P3</span> <span class="o">&lt;-</span> period.apply(<span class="nv">myList</span><span class="k">$</span><span class="nv">P3</span>, endpoints(<span class="nv">myList</span><span class="k">$</span><span class="nv">P3</span>, <span class="s2">"seconds"</span>, <span class="nv">x</span>), <span class="nv">mean</span>)
+<span class="nv">TW</span> <span class="o">&lt;-</span> period.apply(<span class="nv">myList</span><span class="k">$</span><span class="nv">TW</span>, endpoints(<span class="nv">myList</span><span class="k">$</span><span class="nv">TW</span>, <span class="s2">"seconds"</span>, <span class="nv">x</span>), <span class="nv">mean</span>)
+<span class="nv">TD</span> <span class="o">&lt;-</span> period.apply(<span class="nv">myList</span><span class="k">$</span><span class="nv">TD</span>, endpoints(<span class="nv">myList</span><span class="k">$</span><span class="nv">TD</span>, <span class="s2">"seconds"</span>, <span class="nv">x</span>), <span class="nv">mean</span>)
+<span class="nv">NR</span> <span class="o">&lt;-</span> period.apply(<span class="nv">myList</span><span class="k">$</span><span class="nv">NR</span>, endpoints(<span class="nv">myList</span><span class="k">$</span><span class="nv">NR</span>, <span class="s2">"seconds"</span>, <span class="nv">x</span>), <span class="nv">mean</span>)
+<span class="nv">WS</span> <span class="o">&lt;-</span> period.apply(<span class="nv">myList</span><span class="k">$</span><span class="nv">WS</span>, endpoints(<span class="nv">myList</span><span class="k">$</span><span class="nv">WS</span>, <span class="s2">"seconds"</span>, <span class="nv">x</span>), <span class="nv">mean</span>)
+<span class="nv">Q</span>  <span class="o">&lt;-</span> period.apply(<span class="nv">myList</span><span class="k">$</span><span class="nv">Q</span>,  endpoints(<span class="nv">myList</span><span class="k">$</span><span class="nv">Q</span>,  <span class="s2">"seconds"</span>, <span class="nv">x</span>), <span class="nv">mean</span>)</pre></div>
 
 <p>Derive new variables, e.g. potential evapotranspiration from weather variables</p>
 
-<div class="highlight highlight-R"><pre>E <span class="o">&lt;-</span> pet<span class="p">(</span>stationElevation<span class="o">=</span><span class="m">0</span><span class="p">,</span>TD<span class="p">,</span>TW<span class="p">,</span>NR<span class="p">,</span>WS<span class="p">)</span>
-</pre></div>
+<div class="highlight highlight-R"><pre><span class="nv">E</span> <span class="o">&lt;-</span> pet(<span class="nv">stationElevation</span><span class="o">=</span><span class="m">0</span>,<span class="nv">TD</span>,<span class="nv">TW</span>,<span class="nv">NR</span>,<span class="nv">WS</span>)</pre></div>
 
 <p>Align time stamps</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># format time index consistently</span>
-P1a <span class="o">&lt;-</span> align.time<span class="p">(</span>P1<span class="p">,</span> x<span class="p">)</span>
-P2a <span class="o">&lt;-</span> align.time<span class="p">(</span>P2<span class="p">,</span> x<span class="p">)</span>
-P3a <span class="o">&lt;-</span> align.time<span class="p">(</span>P3<span class="p">,</span> x<span class="p">)</span>
-Ea <span class="o">&lt;-</span> align.time<span class="p">(</span>E<span class="p">,</span> x<span class="p">)</span>
-Qa <span class="o">&lt;-</span> align.time<span class="p">(</span>Q<span class="p">,</span> x<span class="p">)</span>
-
+<span class="nv">P1a</span> <span class="o">&lt;-</span> align.time(<span class="nv">P1</span>, <span class="nv">x</span>)
+<span class="nv">P2a</span> <span class="o">&lt;-</span> align.time(<span class="nv">P2</span>, <span class="nv">x</span>)
+<span class="nv">P3a</span> <span class="o">&lt;-</span> align.time(<span class="nv">P3</span>, <span class="nv">x</span>)
+<span class="nv">Ea</span> <span class="o">&lt;-</span> align.time(<span class="nv">E</span>, <span class="nv">x</span>)
+<span class="nv">Qa</span> <span class="o">&lt;-</span> align.time(<span class="nv">Q</span>, <span class="nv">x</span>)
 </pre></div>
 
 <p>Select periods with simultaneous recordings</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># Select periods with simultaneous recordings</span>
-newList <span class="o">&lt;-</span> CommonRecordingTime<span class="p">(</span><span class="kt">list</span><span class="p">(</span><span class="s">"P1"</span> <span class="o">=</span> P1a<span class="p">,</span> <span class="s">"P2"</span> <span class="o">=</span> P2a<span class="p">,</span> <span class="s">"P3"</span> <span class="o">=</span> P3a<span class="p">,</span> 
-                                    <span class="s">"E"</span> <span class="o">=</span> Ea<span class="p">,</span> <span class="s">"Q"</span> <span class="o">=</span> Qa<span class="p">)</span> <span class="p">)</span>
-</pre></div>
+<span class="nv">newList</span> <span class="o">&lt;-</span> CommonRecordingTime(<span class="kt">list</span>(<span class="s2">"P1"</span> <span class="o">=</span> <span class="nv">P1a</span>, <span class="s2">"P2"</span> <span class="o">=</span> <span class="nv">P2a</span>, <span class="s2">"P3"</span> <span class="o">=</span> <span class="nv">P3a</span>, 
+                                    <span class="s2">"E"</span> <span class="o">=</span> <span class="nv">Ea</span>, <span class="s2">"Q"</span> <span class="o">=</span> <span class="nv">Qa</span>) )</pre></div>
 
 <p>Aggregate in space, e.g. areal averaging using spatial interpolation methods</p>
 
-<div class="highlight highlight-R"><pre>tsList <span class="o">&lt;-</span> <span class="kt">data.frame</span><span class="p">(</span>index<span class="p">(</span>newList<span class="p">),</span><span class="s">"P1"</span><span class="o">=</span>newList<span class="o">$</span>P1<span class="p">,</span>
-                     <span class="s">"P2"</span><span class="o">=</span>newList<span class="o">$</span>P2<span class="p">,</span><span class="s">"P2"</span><span class="o">=</span>newList<span class="o">$</span>P3<span class="p">)</span>
+<div class="highlight highlight-R"><pre><span class="nv">tsList</span> <span class="o">&lt;-</span> <span class="kt">data.frame</span>(index(<span class="nv">newList</span>),<span class="s2">"P1"</span><span class="o">=</span><span class="nv">newList</span><span class="k">$</span><span class="nv">P1</span>,
+                     <span class="s2">"P2"</span><span class="o">=</span><span class="nv">newList</span><span class="k">$</span><span class="nv">P2</span>,<span class="s2">"P2"</span><span class="o">=</span><span class="nv">newList</span><span class="k">$</span><span class="nv">P3</span>)
 
-P <span class="o">&lt;-</span> ArealAveraging<span class="p">(</span>tsList<span class="p">,</span>areas<span class="o">=</span><span class="kt">c</span><span class="p">(</span><span class="m">0.3</span><span class="p">,</span><span class="m">0.6</span><span class="p">,</span><span class="m">0.1</span><span class="p">),</span>
-                    interpolationMethod <span class="o">=</span><span class="s">"Thiessen"</span><span class="p">)</span>
-</pre></div>
+<span class="nv">P</span> <span class="o">&lt;-</span> ArealAveraging(<span class="nv">tsList</span>,<span class="nv">areas</span><span class="o">=</span>c(<span class="m">0.3</span>,<span class="m">0.6</span>,<span class="m">0.1</span>),
+                    <span class="nv">interpolationMethod</span> <span class="o">=</span><span class="s2">"Thiessen"</span>)</pre></div>
 
 <p>Check if there are gaps in the records and infill</p>
 
-<div class="highlight highlight-R"><pre><span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>P<span class="p">))</span> <span class="c1"># FALSE</span>
+<div class="highlight highlight-R"><pre>any(is.na(<span class="nv">P</span>)) <span class="c1"># FALSE</span>
 
-<span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>newList<span class="o">$</span>E<span class="p">))</span> <span class="c1"># This returns TRUE, infill the missing values</span>
-Enomissing <span class="o">&lt;-</span> na.approx<span class="p">(</span>newList<span class="o">$</span>E<span class="p">)</span>
+any(is.na(<span class="nv">newList</span><span class="k">$</span><span class="nv">E</span>)) <span class="c1"># This returns TRUE, infill the missing values</span>
+<span class="nv">Enomissing</span> <span class="o">&lt;-</span> na.approx(<span class="nv">newList</span><span class="k">$</span><span class="nv">E</span>)
 
-<span class="kp">any</span><span class="p">(</span><span class="kp">is.na</span><span class="p">(</span>newList<span class="o">$</span>Q<span class="p">))</span> <span class="c1"># This returns TRUE, infill the missing values</span>
-Qnomissing <span class="o">&lt;-</span> na.approx<span class="p">(</span>newList<span class="o">$</span>Q<span class="p">)</span>
-</pre></div>
+any(is.na(<span class="nv">newList</span><span class="k">$</span><span class="nv">Q</span>)) <span class="c1"># This returns TRUE, infill the missing values</span>
+<span class="nv">Qnomissing</span> <span class="o">&lt;-</span> na.approx(<span class="nv">newList</span><span class="k">$</span><span class="nv">Q</span>)</pre></div>
 
 <p>If necessary, convert units to mm/day:</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># P is already in mm/day</span>
-E <span class="o">&lt;-</span> Enomissing<span class="o">*</span><span class="m">24</span> <span class="c1"># from mm/h to mm/day</span>
+<span class="nv">E</span> <span class="o">&lt;-</span> <span class="nv">Enomissing</span><span class="o">*</span><span class="m">24</span> <span class="c1"># from mm/h to mm/day</span>
 
-Area <span class="o">&lt;-</span> <span class="m">10.55</span> <span class="c1"># Km2</span>
-Q <span class="o">&lt;-</span> Qnomissing<span class="o">*</span><span class="m">0.086.4</span><span class="o">/</span>Area <span class="c1"># from l/s to mm/day</span>
-</pre></div>
+<span class="nv">Area</span> <span class="o">&lt;-</span> <span class="m">10.55</span> <span class="c1"># Km2</span>
+<span class="nv">Q</span> <span class="o">&lt;-</span> <span class="nv">Qnomissing</span><span class="o">*</span><span class="m">0.086.4</span><span class="o">/</span><span class="nv">Area</span> <span class="c1"># from l/s to mm/day</span></pre></div>
 
 <p>Merge P, E and Q in 1 time series object</p>
 
-<div class="highlight highlight-R"><pre>DATA <span class="o">&lt;-</span> <span class="kp">merge</span><span class="p">(</span>P<span class="p">,</span>E<span class="p">,</span>Q<span class="p">)</span>
-</pre></div>
+<div class="highlight highlight-R"><pre><span class="nv">DATA</span> <span class="o">&lt;-</span> merge(<span class="nv">P</span>,<span class="nv">E</span>,<span class="nv">Q</span>)</pre></div>
 
 <h3>
-<a name="rainfall-runoff-modelling-using-fuse" class="anchor" href="#rainfall-runoff-modelling-using-fuse"><span class="octicon octicon-link"></span></a>Rainfall-Runoff modelling using FUSE</h3>
+<a id="rainfall-runoff-modelling-using-fuse" class="anchor" href="#rainfall-runoff-modelling-using-fuse" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rainfall-Runoff modelling using FUSE</h3>
 
 <p>As an example, we could combine 50 parameter sets and 4 model structures to generate 200 model simulations.</p>
 
 <p>Sample 50 parameter sets for FUSE, using LHS method</p>
 
-<div class="highlight highlight-R"><pre><span class="kn">library</span><span class="p">(</span>fuse<span class="p">)</span>
-data<span class="p">(</span>DATA<span class="p">)</span>
+<div class="highlight highlight-R"><pre>library(<span class="nv">fuse</span>)
+data(<span class="nv">DATA</span>)
 
-<span class="kp">set.seed</span><span class="p">(</span><span class="m">123</span><span class="p">)</span>
-NumberOfRuns <span class="o">&lt;-</span> <span class="m">10</span>    
-parameters <span class="o">&lt;-</span> GeneratePsetsFUSE<span class="p">(</span>NumberOfRuns<span class="p">)</span>
-</pre></div>
+set.seed(<span class="m">123</span>)
+<span class="nv">NumberOfRuns</span> <span class="o">&lt;-</span> <span class="m">10</span>    
+<span class="nv">parameters</span> <span class="o">&lt;-</span> GeneratePsetsFUSE(<span class="nv">NumberOfRuns</span>)</pre></div>
 
 <p>Choose a list of models to take into account</p>
 
-<div class="highlight highlight-R"><pre>data<span class="p">(</span>modlist<span class="p">)</span>
-parentModels <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="m">60</span><span class="p">,</span><span class="m">230</span><span class="p">,</span><span class="m">342</span><span class="p">,</span><span class="m">426</span><span class="p">)</span> <span class="c1"># those are the parent models </span>
-ModelList <span class="o">&lt;-</span> modlist<span class="p">[</span><span class="kp">which</span><span class="p">(</span>modlist<span class="o">$</span>mid <span class="o">%in%</span> parentModels<span class="p">),]</span>
-<span class="kp">row.names</span><span class="p">(</span>ModelList<span class="p">)</span> <span class="o">&lt;-</span> <span class="kc">NULL</span>
-</pre></div>
+<div class="highlight highlight-R"><pre><span class="nv">parentModels</span> <span class="o">&lt;-</span> c(<span class="m">60</span>,<span class="m">230</span>,<span class="m">342</span>,<span class="m">426</span>) <span class="c1"># those are the parent models</span></pre></div>
 
 <p>Define the list of Model Performance Indices (MPIs)</p>
 
-<div class="highlight highlight-R"><pre><span class="kn">library</span><span class="p">(</span>tiger<span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>qualV<span class="p">)</span>
+<div class="highlight highlight-R"><pre>library(<span class="nv">tiger</span>)
+library(<span class="nv">qualV</span>)
 
-LAGTIME <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> lagtime<span class="p">(</span>x<span class="o">$</span>Qo<span class="p">,</span>x<span class="o">$</span>Qs<span class="p">)</span>    
-MAE     <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> <span class="kp">mean</span><span class="p">(</span>x<span class="o">$</span>Qs <span class="o">-</span> x<span class="o">$</span>Qo<span class="p">,</span> na.rm <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>            
-NSHF    <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> <span class="m">1</span> <span class="o">-</span> EF<span class="p">(</span>x<span class="o">$</span>Qo<span class="p">,</span>x<span class="o">$</span>Qs<span class="p">)</span>           
-NSLF    <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> <span class="m">1</span> <span class="o">-</span> EF<span class="p">(</span> <span class="kp">log</span><span class="p">(</span>x<span class="o">$</span>Qo<span class="p">)</span> <span class="p">,</span> <span class="kp">log</span><span class="p">(</span>x<span class="o">$</span>Qs<span class="p">)</span> <span class="p">)</span>           
-RR      <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>x<span class="p">)</span> <span class="kp">sum</span><span class="p">(</span>x<span class="o">$</span>Qs<span class="p">)</span> <span class="o">/</span><span class="kp">sum</span><span class="p">(</span>x<span class="o">$</span>Po<span class="p">)</span>
+<span class="nv">LAGTIME</span> <span class="o">=</span> <span class="k">function</span>(<span class="nv">x</span>) lagtime(<span class="nv">x</span><span class="k">$</span><span class="nv">Qo</span>,<span class="nv">x</span><span class="k">$</span><span class="nv">Qs</span>)    
+<span class="nv">MAE</span>     <span class="o">=</span> <span class="k">function</span>(<span class="nv">x</span>) mean(<span class="nv">x</span><span class="k">$</span><span class="nv">Qs</span> <span class="o">-</span> <span class="nv">x</span><span class="k">$</span><span class="nv">Qo</span>, <span class="nv">na.rm</span> <span class="o">=</span> <span class="kc">TRUE</span>)            
+<span class="nv">NSHF</span>    <span class="o">=</span> <span class="k">function</span>(<span class="nv">x</span>) <span class="m">1</span> <span class="o">-</span> EF(<span class="nv">x</span><span class="k">$</span><span class="nv">Qo</span>,<span class="nv">x</span><span class="k">$</span><span class="nv">Qs</span>)           
+<span class="nv">NSLF</span>    <span class="o">=</span> <span class="k">function</span>(<span class="nv">x</span>) <span class="m">1</span> <span class="o">-</span> EF( log(<span class="nv">x</span><span class="k">$</span><span class="nv">Qo</span>) , log(<span class="nv">x</span><span class="k">$</span><span class="nv">Qs</span>) )           
+<span class="nv">RR</span>      <span class="o">=</span> <span class="k">function</span>(<span class="nv">x</span>) sum(<span class="nv">x</span><span class="k">$</span><span class="nv">Qs</span>) <span class="o">/</span>sum(<span class="nv">x</span><span class="k">$</span><span class="nv">Po</span>)
 
-MPIs <span class="o">&lt;-</span> <span class="kt">list</span><span class="p">(</span><span class="s">"LAGTIME"</span><span class="o">=</span>LAGTIME<span class="p">,</span><span class="s">"MAE"</span><span class="o">=</span>MAE<span class="p">,</span><span class="s">"NSHF"</span><span class="o">=</span>NSHF<span class="p">,</span><span class="s">"NSLF"</span><span class="o">=</span>NSLF<span class="p">,</span><span class="s">"RR"</span><span class="o">=</span>RR<span class="p">)</span>
-</pre></div>
+<span class="nv">MPIs</span> <span class="o">&lt;-</span> <span class="kt">list</span>(<span class="s2">"LAGTIME"</span><span class="o">=</span><span class="nv">LAGTIME</span>,<span class="s2">"MAE"</span><span class="o">=</span><span class="nv">MAE</span>,<span class="s2">"NSHF"</span><span class="o">=</span><span class="nv">NSHF</span>,<span class="s2">"NSLF"</span><span class="o">=</span><span class="nv">NSLF</span>,<span class="s2">"RR"</span><span class="o">=</span><span class="nv">RR</span>)</pre></div>
 
 <p>Run simulations</p>
 
-<div class="highlight highlight-R"><pre>outputFolder <span class="o">&lt;-</span> <span class="s">"~"</span>
-deltim <span class="o">&lt;-</span> <span class="m">1</span><span class="o">/</span><span class="m">24</span> <span class="c1"># or dt/60/60/24</span>
-warmup <span class="o">&lt;-</span> <span class="kp">round</span><span class="p">(</span><span class="kp">dim</span><span class="p">(</span>DATA<span class="p">)[</span><span class="m">1</span><span class="p">]</span><span class="o">/</span><span class="m">10</span><span class="p">,</span><span class="m">0</span><span class="p">)</span>
+<div class="highlight highlight-R"><pre><span class="nv">outputFolder</span> <span class="o">&lt;-</span> <span class="s2">"~"</span>
+<span class="nv">deltim</span> <span class="o">&lt;-</span> <span class="m">1</span><span class="o">/</span><span class="m">24</span> <span class="c1"># or dt/60/60/24</span>
+<span class="nv">warmup</span> <span class="o">&lt;-</span> round(dim(<span class="nv">DATA</span>)[<span class="m">1</span>]<span class="o">/</span><span class="m">10</span>,<span class="m">0</span>)
 
 <span class="c1"># It is recommended to run simulations on HPC facilities. </span>
 <span class="c1"># However small batches can be run locally using the function MCsimulations()</span>
-MCsimulations<span class="p">(</span>DATA<span class="p">,</span>deltim<span class="p">,</span>warmup<span class="p">,</span>parameters<span class="p">,</span>ModelList<span class="p">,</span>outputFolder<span class="p">,</span>MPIs<span class="p">)</span>
-</pre></div>
+MCsimulations(<span class="nv">DATA</span>,<span class="nv">deltim</span>,<span class="nv">warmup</span>,<span class="nv">parameters</span>,<span class="nv">parentModels</span>,<span class="nv">outputFolder</span>,<span class="nv">MPIs</span>)</pre></div>
 
 <h3>
-<a name="find-the-best-configurations-amongst-those-simulated" class="anchor" href="#find-the-best-configurations-amongst-those-simulated"><span class="octicon octicon-link"></span></a>Find the best configuration(s) amongst those simulated</h3>
+<a id="find-the-best-configurations-amongst-those-simulated" class="anchor" href="#find-the-best-configurations-amongst-those-simulated" aria-hidden="true"><span class="octicon octicon-link"></span></a>Find the best configuration(s) amongst those simulated</h3>
 
 <p>For this task it is necessary to install another experimental package called AMCA:</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># Install pure package</span>
-install_github<span class="p">(</span><span class="s">"r_amca"</span><span class="p">,</span> username <span class="o">=</span> <span class="s">"cvitolo"</span><span class="p">,</span> subdir <span class="o">=</span> <span class="s">"amca"</span><span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>amca<span class="p">)</span>
-</pre></div>
+install_github(<span class="s2">"cvitolo/r_amca"</span>, <span class="nv">subdir</span> <span class="o">=</span> <span class="s2">"amca"</span>)
+library(<span class="nv">amca</span>)</pre></div>
 
 <p>Run the algorithm:</p>
 
-<div class="highlight highlight-R"><pre>results <span class="o">&lt;-</span> amca<span class="p">(</span>DATA<span class="p">,</span>ModelList<span class="p">,</span>warmup<span class="p">,</span>parameters<span class="p">,</span>outputFolder<span class="p">)</span>
-</pre></div>
+<div class="highlight highlight-R"><pre><span class="nv">results</span> <span class="o">&lt;-</span> amca(<span class="nv">DATA</span>,<span class="nv">ModelList</span>,<span class="nv">warmup</span>,<span class="nv">parameters</span>,<span class="nv">outputFolder</span>)</pre></div>
 
 <p>The best configuration is stored in</p>
 
-<div class="highlight highlight-R"><pre>results<span class="o">$</span>RETable
-</pre></div>
+<div class="highlight highlight-R"><pre><span class="nv">results</span><span class="k">$</span><span class="nv">RETable</span></pre></div>
 
 <h3>
-<a name="frequency-analysis" class="anchor" href="#frequency-analysis"><span class="octicon octicon-link"></span></a>Frequency Analysis</h3>
+<a id="frequency-analysis" class="anchor" href="#frequency-analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Frequency Analysis</h3>
 
 <p>For this task it is necessary to install another packages:</p>
 
 <div class="highlight highlight-R"><pre><span class="c1"># Install and load packages </span>
-install.packages<span class="p">(</span><span class="s">"hydromad"</span><span class="p">,</span> repos<span class="o">=</span><span class="s">"http://hydromad.catchment.org"</span><span class="p">)</span>
-install.packages<span class="p">(</span><span class="s">"EcoHydRology"</span><span class="p">)</span>
-<span class="kn">library</span><span class="p">(</span>EcoHydRology<span class="p">)</span>
-</pre></div>
+install.packages(<span class="s2">"hydromad"</span>, <span class="nv">repos</span><span class="o">=</span><span class="s2">"http://hydromad.catchment.org"</span>)
+install.packages(<span class="s2">"EcoHydRology"</span>)
+library(<span class="nv">EcoHydRology</span>)</pre></div>
 
 <p>Identify events Precipitation-discharge events:</p>
 
-<div class="highlight highlight-R"><pre>df <span class="o">&lt;-</span> EventIdentification<span class="p">(</span>DATA<span class="p">)</span>
-</pre></div>
+<div class="highlight highlight-R"><pre><span class="nv">df</span> <span class="o">&lt;-</span> EventIdentification(<span class="nv">DATA</span>)</pre></div>
 
 <h3>
-<a name="curve-number" class="anchor" href="#curve-number"><span class="octicon octicon-link"></span></a>Curve Number</h3>
+<a id="curve-number" class="anchor" href="#curve-number" aria-hidden="true"><span class="octicon octicon-link"></span></a>Curve Number</h3>
 
 <p>Determine the CN for each event where P &amp; Q are in inches and area is in acre</p>
 
-<div class="highlight highlight-R"><pre>Q <span class="o">&lt;-</span> df<span class="o">$</span>Q<span class="o">/</span><span class="m">25.4</span>       <span class="c1"># in inches</span>
-P <span class="o">&lt;-</span> df<span class="o">$</span>P<span class="o">/</span><span class="m">25.5</span>       <span class="c1"># in inches</span>
-area <span class="o">&lt;-</span> Area<span class="o">*</span><span class="m">247.105</span> <span class="c1"># in acre</span>
+<div class="highlight highlight-R"><pre><span class="nv">Q</span> <span class="o">&lt;-</span> <span class="nv">df</span><span class="k">$</span><span class="nv">Q</span><span class="o">/</span><span class="m">25.4</span>       <span class="c1"># in inches</span>
+<span class="nv">P</span> <span class="o">&lt;-</span> <span class="nv">df</span><span class="k">$</span><span class="nv">P</span><span class="o">/</span><span class="m">25.5</span>       <span class="c1"># in inches</span>
+<span class="nv">area</span> <span class="o">&lt;-</span> <span class="nv">Area</span><span class="o">*</span><span class="m">247.105</span> <span class="c1"># in acre</span>
 
-CN <span class="o">&lt;-</span> calculateCN<span class="p">(</span>P<span class="p">,</span>Q<span class="p">);</span> df<span class="o">$</span>CN <span class="o">&lt;-</span> CN
-myCN <span class="o">&lt;-</span> median<span class="p">(</span> <span class="kp">sort</span><span class="p">(</span>CN<span class="p">,</span> decreasing <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)[</span><span class="m">1</span><span class="o">:</span><span class="m">5</span><span class="p">]</span> <span class="p">)</span>
-
+<span class="nv">CN</span> <span class="o">&lt;-</span> calculateCN(<span class="nv">P</span>,<span class="nv">Q</span>); <span class="nv">df</span><span class="k">$</span><span class="nv">CN</span> <span class="o">&lt;-</span> <span class="nv">CN</span>
+<span class="nv">myCN</span> <span class="o">&lt;-</span> median( sort(<span class="nv">CN</span>, <span class="nv">decreasing</span> <span class="o">=</span> <span class="kc">TRUE</span>)[<span class="m">1</span><span class="k">:</span><span class="m">5</span>] )
 </pre></div>
 
 <h1>
-<a name="leave-your-feedback" class="anchor" href="#leave-your-feedback"><span class="octicon octicon-link"></span></a>Leave your feedback</h1>
+<a id="leave-your-feedback" class="anchor" href="#leave-your-feedback" aria-hidden="true"><span class="octicon octicon-link"></span></a>Leave your feedback</h1>
 
 <p>I would greatly appreciate if you could leave your feedbacks via email (<a href="mailto:cvitolodev@gmail.com">cvitolodev@gmail.com</a>).</p>
       </section>
