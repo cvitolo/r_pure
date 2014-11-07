@@ -11,7 +11,6 @@ Requirements:
 sudo apt-get install libudunits2-dev
 install.packages("hydroTSM")
 
-
 #### Basics
 Install and load packages
 ```R
@@ -24,16 +23,13 @@ lapply(x, require, character.only=T); rm(x)
 
 # Install dpendent package from R-Forge:
 install.packages("fuse", repos="http://R-Forge.R-project.org")
-library(fuse)
 
 # Install dependent gists and packages from github:
 library(devtools)
-install_github("r_rnrfa", username = "cvitolo", subdir = "rnrfa")
-library(rnrfa)
+install_github("cvitolo/r_rnrfa", subdir = "rnrfa")
 
 # Install pure package
-install_github("r_pure", username = "cvitolo", subdir = "pure")
-library(pure)
+install_github("cvitolo/r_pure", subdir = "pure")
 ```
 
 Make zoo objects for your time series: 
@@ -45,6 +41,7 @@ Make zoo objects for your time series:
 
 An example is given below:
 ```R
+library(pure)
 # Load sample time series (this contains 3 objects: P, E and Q)
 data(P1)
 data(P2)
@@ -191,10 +188,7 @@ parameters <- GeneratePsetsFUSE(NumberOfRuns)
 
 Choose a list of models to take into account
 ```R
-data(modlist)
-parentModels <- c(60,230,342,426) # those are the parent models 
-ModelList <- modlist[which(modlist$mid %in% parentModels),]
-row.names(ModelList) <- NULL
+parentModels <- c(60,230,342,426) # those are the parent models
 ```
 
 Define the list of Model Performance Indices (MPIs)
@@ -219,7 +213,7 @@ warmup <- round(dim(DATA)[1]/10,0)
 
 # It is recommended to run simulations on HPC facilities. 
 # However small batches can be run locally using the function MCsimulations()
-MCsimulations(DATA,deltim,warmup,parameters,ModelList,outputFolder,MPIs)
+MCsimulations(DATA,deltim,warmup,parameters,parentModels,outputFolder,MPIs)
 ```
 
 ### Find the best configuration(s) amongst those simulated
@@ -227,7 +221,7 @@ For this task it is necessary to install another experimental package called AMC
 
 ```R
 # Install pure package
-install_github("r_amca", username = "cvitolo", subdir = "amca")
+install_github("cvitolo/r_amca", subdir = "amca")
 library(amca)
 ```
 

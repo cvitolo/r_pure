@@ -4,7 +4,7 @@
 #' @param deltim this is the time step (in days)
 #' @param warmup this is the warmup period
 #' @param parameters table containing the parameter sets, see \code{GeneratePsetsFUSE}
-#' @param ModelList this is the reduced list of model structures (total number: 240)
+#' @param ListOfModels this is the reduced list of model structures (default = 1:1248)
 #' @param SimulationFolder path to the folder where the function saves the results
 #' @param MPIs list of functions describing the Model performance Indices
 #' @param verbose if TRUE, it prints details of the current simulation
@@ -12,25 +12,26 @@
 #' @return 2 arrays: R (discharges) and S (indices).
 #'
 #' @examples
-#' # MCsimulations(DATA,deltim,warmup,parameters,ModelList,SimulationFolder,MPIs)
+#' # MCsimulations(DATA,deltim,warmup,parameters,ListOfModels,SimulationFolder,MPIs)
 #'
 
-MCsimulations <- function(DATA,deltim,warmup,parameters,ModelList,
+MCsimulations <- function(DATA,deltim,warmup,parameters,
+                          ListOfModels=1:1248,
                           SimulationFolder, MPIs,
                           verbose=TRUE){
 
   # library(fuse)
   DATA <- coredata(DATA)
 
-  for (i in 1:dim(ModelList)[1]){ ###!!!
+  for (i in 1:length(ListOfModels)){
 
-    mid <- ModelList[i,"mid"]
+    mid <- ListOfModels[i]
     indices <- data.frame(matrix(NA, nrow=dim(parameters)[1], ncol=length(MPIs) ))
     discharges <- data.frame(matrix(NA, nrow=dim(parameters)[1],ncol=dim(DATA)[1]-warmup))
 
     for (pid in 1:dim(parameters)[1]){
 
-      if (verbose==TRUE) print(paste("Current model: ",mid," - Current run(p. set): ",pid))
+      if (verbose==TRUE) print(paste("Current configuration: model ",mid," - parameter set ",pid))
 
       ParameterSet <- as.list(parameters[pid,])
 

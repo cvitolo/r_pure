@@ -3,8 +3,8 @@
 \alias{MCsimulations}
 \title{This function runs Monte Carlo simulations for a given number of realisations.}
 \usage{
-MCsimulations(DATA, deltim, warmup, parameters, ModelList, SimulationFolder,
-  MPIs, verbose = TRUE)
+MCsimulations(DATA, deltim, warmup, parameters, ListOfModels = 1:1248,
+  SimulationFolder, MPIs, verbose = TRUE)
 }
 \arguments{
 \item{DATA}{this is the data frame containing the observations}
@@ -15,7 +15,7 @@ MCsimulations(DATA, deltim, warmup, parameters, ModelList, SimulationFolder,
 
 \item{parameters}{table containing the parameter sets, see \code{GeneratePsetsFUSE}}
 
-\item{ModelList}{this is the reduced list of model structures (total number: 240)}
+\item{ListOfModels}{this is the reduced list of model structures (default = 1:1248)}
 
 \item{SimulationFolder}{path to the folder where the function saves the results}
 
@@ -30,6 +30,6 @@ MCsimulations(DATA, deltim, warmup, parameters, ModelList, SimulationFolder,
 This function runs Monte Carlo simulations for a given number of realisations.
 }
 \examples{
-# MCsimulations(DATA,deltim,warmup,parameters,ModelList,SimulationFolder,MPIs)
+# MCsimulations(DATA,deltim,warmup,parameters,ListOfModels,SimulationFolder,MPIs)
 }
 
