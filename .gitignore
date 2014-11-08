@@ -10,7 +10,7 @@
 # RStudio files
 .Rproj.user/
 .Rproj.user
-pure.Rproj
+r_pure.Rproj
 .Rbuildignore
 
 # old files
@@ -21,3 +21,7 @@ test
 
 # HTML files
 *.html
+
+*.tar.gz
+
+tests/*

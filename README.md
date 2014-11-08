@@ -227,7 +227,7 @@ library(amca)
 
 Run the algorithm:
 ```R
-results <- amca(DATA,ModelList,warmup,parameters,outputFolder)
+results <- amca(DATA, parameters, MPIs, outputFolder, selectedModels, warmup)
 ```
 
 The best configuration is stored in
