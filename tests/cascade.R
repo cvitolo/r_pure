@@ -1,15 +1,14 @@
 # Install/load libraries
 x <- c("zoo", "chron", "xts", "manipulate", "rgdal", "tgp", "rgdal",
        "sp", "gstat", "grid", "hydroTSM", "Hmisc", "raster", "reshape2",
-       "ggplot2", "qualV", "lhs", "MASS",
-       "amca","fuse","pure")
+       "ggplot2", "qualV", "lhs", "MASS", "amca","fuse","pure")
 # install.packages(x)
 lapply(x, require, character.only=T); rm(x)
-source('~/Dropbox/Repos/github/r_pure/tests/LoadPureData.R')
+source('/home/cvitolo/Dropbox/Repos/github/r_pure/tests/LoadPureData.R')
 
 # set the path to the input files folder (NOTE: do not use ~ for home folder,
 # rgdal does not like it!)
-datafolder <- "/home/claudia/Dropbox/Projects/PURE/PURE_shared/Data/"
+datafolder <- "/home/cvitolo/Dropbox/Projects/PURE/PURE_shared/Data/"
 
 # Extract data for Pontbren, subcatchment 9
 CatchmentName <- "Pontbren"
@@ -191,6 +190,13 @@ Q <- df$Q/25.4
 P <- df$P/25.5
 area <- 4.8*247.105 # area <- DataList$Area*247.105
 
-CN <- calculateCN(P,Q); df$CN <- CN
-myCN <- median( sort(CN, decreasing = TRUE)[1:5] )
+CN <- CalculateCN(P,Q); df$CN <- CN
+CN0 <- median( sort(CN, decreasing = TRUE)[1:5] )
+k=1
 
+# nonlinear least squares curve fiiting
+fit <- nls(CN ~ CN0 - (100 - CN0) * exp(-P), start=list(CN0=CN0))
+
+summary(fit)
+
+coefficients(fit)

@@ -235,32 +235,59 @@ The best configuration is stored in
 results$RETable
 ```
 
-### Frequency Analysis
-For this task it is necessary to install another packages:
+### Frequency Analysis & Curve Number
+For this task it is necessary to install other packages:
 
 ```R
-# Install and load packages 
-install.packages("hydromad", repos="http://hydromad.catchment.org")
-install.packages("EcoHydRology")
-library(EcoHydRology)
+# Install dependent packages from CRAN:
+x <- c("zoo", "EcoHydRology", "udunits2","devtools")
+install.packages(x)
+lapply(x, require, character.only=T); rm(x)
+
+# Install dependent packages from github:
+install_github("josephguillaume/hydromad")
+install_github("cvitolo/r_CurveNumber", subdir = "curvenumber")
 ```
 
-Identify events Precipitation-discharge events:
+Load the library and some test data
+
 ```R
-df <- EventIdentification(DATA)
+library(curvenumber)
+data(DATA) 
+
+# DATA is in mm/d but the time step is 1 hour, below is an adjustment:
+InputTS <- DATA/24; rm(DATA)
 ```
 
-### Curve Number
-Determine the CN for each event where P & Q are in inches and area is in acre
+#### Identify Rainfall-Runoff events
+According to [Hawkins (1993)](http://dx.doi.org/10.1061/(ASCE)0733-9437(1993)119:2(334)), in order to calculate the curve Number, the rainfall and runoff events can be identified separately. Return periods are then matched using the Frequency Matching approach [Hjelmfelt (1980)](http://cedb.asce.org/cgi/WWWdisplay.cgi?9734). 
+
 ```R
-Q <- df$Q/25.4       # in inches
-P <- df$P/25.5       # in inches
-area <- Area*247.105 # in acre
-
-CN <- calculateCN(P,Q); df$CN <- CN
-myCN <- median( sort(CN, decreasing = TRUE)[1:5] )
-
+df  <- EventIdentification(dataX = InputTS,
+                           hours2extend = 6, plotOption = FALSE,
+                           stepsBack = 5, timeUnits = "hours")
 ```
+
+#### Calculate the Curve Number
+Determine the Curve Number and k coefficient and also plot CN-P behaviour to 
+define the type of asymptote
+```R
+coef <- CalculateCN(dfTPQ = df, PQunits = "mm", plotOption = TRUE)
+```
+
+Please note that there are three types of behaviour: 
+* "standard" (increasing asymptotically), 
+* "complacent" (decreasing indefinitely) and 
+* "violent" (increasing asymptotically).
+Here, only the standard behaviour is implemented. In this case, CN (infinity) is
+the value of CN that corresponds to the largest rainfall events and can be 
+calculated by a nonlinear least squares curve fitting (red line).
+
+For more information on the Curve Number package visit the dedicated 
+[github page](http://cvitolo.github.io/r_CurveNumber/).
+
+### Warnings
+This package and functions herein are part of an experimental open-source project. They are provided as is, without any guarantee.
 
 # Leave your feedback
 I would greatly appreciate if you could leave your feedbacks via email (cvitolodev@gmail.com).
