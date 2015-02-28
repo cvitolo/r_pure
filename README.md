@@ -1,6 +1,8 @@
 PURE (R package)
 ================
 
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.15720.svg)](http://dx.doi.org/10.5281/zenodo.15720)
+
 Workflow for flood frequency analysis under uncertainty (work in progress!).
 
 Project: PURE (Probability, Uncertainty and Risk in the Environment) - RACER consortium (Flood strand)
@@ -10,6 +12,9 @@ Check out: NERC-PURE programme at http://www.nerc.ac.uk/research/programmes/pure
 Requirements:
 sudo apt-get install libudunits2-dev
 install.packages("hydroTSM")
+
+**To cite this software:**  
+Vitolo C., Huntley N., PURE (R package), (2015), GitHub repository, https://github.com/cvitolo/r_pure, doi: http://dx.doi.org/10.5281/zenodo.15720
 
 #### Basics
 Install and load packages

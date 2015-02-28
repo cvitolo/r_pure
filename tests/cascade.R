@@ -4,11 +4,11 @@ x <- c("zoo", "chron", "xts", "manipulate", "rgdal", "tgp", "rgdal",
        "ggplot2", "qualV", "lhs", "MASS", "amca","fuse","pure")
 # install.packages(x)
 lapply(x, require, character.only=T); rm(x)
-source('/home/cvitolo/Dropbox/Repos/github/r_pure/tests/LoadPureData.R')
+source('/home/claudia/Dropbox/Repos/github/r_pure/tests/LoadPureData.R')
 
 # set the path to the input files folder (NOTE: do not use ~ for home folder,
 # rgdal does not like it!)
-datafolder <- "/home/cvitolo/Dropbox/Projects/PURE/PURE_shared/Data/"
+datafolder <- "/home/claudia/Dropbox/Projects/PURE/PURE_shared/Data/"
 
 # Extract data for Pontbren, subcatchment 9
 CatchmentName <- "Pontbren"
